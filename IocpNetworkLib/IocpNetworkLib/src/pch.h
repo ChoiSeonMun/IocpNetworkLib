@@ -7,5 +7,6 @@
 #ifndef PCH_H
 #define PCH_H
 
+#include "csmnet/detail/Config.h"
 
 #endif //PCH_H
