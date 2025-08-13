@@ -1,0 +1,63 @@
+#pragma once
+
+#include "Config.h"
+
+namespace csmnet::detail
+{
+    class IocpRegistrable;
+    class IocpEvent;
+
+    class IocpCore final
+    {
+    public:
+        static optional<IocpCore> Make() noexcept;
+        
+        ~IocpCore() noexcept
+        {
+            Close();
+        }
+        
+        IocpCore(const IocpCore&) = delete;
+        IocpCore& operator=(const IocpCore&) = delete;
+
+        IocpCore(IocpCore&& other) noexcept
+            : _iocpHandle(std::exchange(other._iocpHandle, INVALID_HANDLE_VALUE))
+        {
+
+        }
+
+        IocpCore& operator=(IocpCore&& other) noexcept
+        {
+            if (this != &other)
+            {
+                Close();
+
+                _iocpHandle = std::exchange(other._iocpHandle, INVALID_HANDLE_VALUE);
+            }
+
+            return *this;
+        }
+        
+        void Register(const IIocpRegistrable& registrable) const noexcept;
+
+        // 성공 값은 nullptr일 수 있다.
+        expected<IocpEvent*, error_code> GetQueuedCompletionEvent() const noexcept;
+        // 성공 값들 중에는 nullptr일 수 있다.
+        expected<vector<IocpEvent*>, error_code> GetQueuedCompletionEvents() const noexcept;
+
+        bool IsValid() const noexcept { return _iocpHandle != INVALID_HANDLE_VALUE; }
+
+        void Close() noexcept
+        {
+            CloseHandle(_iocpHandle);
+            _iocpHandle = INVALID_HANDLE_VALUE;
+        }
+    private:
+        explicit IocpCore(HANDLE iocpHandle) noexcept
+            : _iocpHandle(iocpHandle)
+        {
+        }
+    private:
+        HANDLE _iocpHandle = INVALID_HANDLE_VALUE;
+    };
+}

@@ -15,6 +15,7 @@ namespace csmnet::detail
 
     class IocpEvent
     {
+        friend IocpEvent* From(OVERLAPPED*, uint32);
     public:
         explicit IocpEvent(IIocpEventProcessor* visitor) : _processor(visitor) {}
         virtual ~IocpEvent() noexcept = default;
@@ -26,11 +27,18 @@ namespace csmnet::detail
             ::memset(&_overlapped, 0, sizeof(_overlapped));
         }
 
+        uint32 GetByteTransferred() const noexcept { return _byteTransferred; }
+        
         OVERLAPPED* GetOverlapped() noexcept { return &_overlapped; }
         const OVERLAPPED* GetOverlapped() const noexcept { return &_overlapped; }
+
     protected:
-        OVERLAPPED _overlapped = {};
+        IIocpEventProcessor* GetProcessor() noexcept { return _processor; }
+        
+    private:
         IIocpEventProcessor* _processor = nullptr;
+        uint32 _byteTransferred = 0;
+        OVERLAPPED _overlapped = {};
     };
 
     class AcceptEvent final : public IocpEvent
@@ -40,7 +48,7 @@ namespace csmnet::detail
 
         void Process() override
         {
-            _processor->Process(this);
+            GetProcessor()->Process(this);
             Reset();
         };
     };
@@ -52,7 +60,7 @@ namespace csmnet::detail
 
         void Process() override
         {
-            _processor->Process(this);
+            GetProcessor()->Process(this);
             Reset();
         };
     };
@@ -64,8 +72,22 @@ namespace csmnet::detail
 
         void Process() override
         {
-            _processor->Process(this);
+            GetProcessor()->Process(this);
             Reset();
         };
     };
+
+    inline IocpEvent* From(OVERLAPPED* overlapped, uint32 byteTransferred)
+    {
+        if (overlapped == nullptr)
+        {
+            return nullptr;
+        }
+
+        IocpEvent* event = CONTAINING_RECORD(overlapped, IocpEvent, _overlapped);
+        event->_byteTransferred = byteTransferred;
+
+        return event;
+    }
 }
+
