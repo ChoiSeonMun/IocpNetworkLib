@@ -16,11 +16,11 @@ namespace csmnet::detail
             return *this;
         }
 
-        int level() const noexcept { return Level; }
-        int name() const noexcept { return Name; }
-        void* data() noexcept { return &_value; }
-        const void* data() const noexcept { return &_value; }
-        size_t size() const noexcept { return sizeof(_value); }
+        int GetLevel() const noexcept { return Level; }
+        int GetName() const noexcept { return Name; }
+        void* GetData() noexcept { return &_value; }
+        const void* GetData() const noexcept { return &_value; }
+        size_t GetSize() const noexcept { return sizeof(_value); }
     private:
         int _value = 0;
     };
@@ -35,11 +35,11 @@ namespace csmnet::detail
         {
         }
 
-        int level() const noexcept { return Level; }
-        int name() const noexcept { return Name; }
-        void* data() noexcept { return &_linger; }
-        const void* data() const noexcept { return &_linger; }
-        size_t size() const noexcept { return sizeof(_linger); }
+        int GetLevel() const noexcept { return Level; }
+        int GetName() const noexcept { return Name; }
+        void* GetData() noexcept { return &_linger; }
+        const void* GetData() const noexcept { return &_linger; }
+        size_t GetSize() const noexcept { return sizeof(_linger); }
     private:
         linger _linger{ 0, 0 };
     };
