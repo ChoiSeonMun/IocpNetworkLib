@@ -3,6 +3,12 @@
 #define WIN32_LEAN_AND_MEAN
 #include <WinSock2.h>
 #include <WS2tcpip.h>
+#include <MSWSock.h>
+
+#pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "mswsock.lib")
+
+#include "WinsockInitializer.h"
 
 #include <utility>
 #include <expected>
@@ -18,7 +24,7 @@ namespace csmnet
     using error_code = std::error_code;
     
     template <typename T>
-    using optional = std::optional;
+    using optional = std::optional<T>;
 
     using int8 = std::int8_t;
     using int16 = std::int16_t;
@@ -29,5 +35,3 @@ namespace csmnet
     using uint32 = std::uint32_t;
     using uint64 = std::uint64_t;
 }
-
-#pragma comment(lib, "Ws2_32.lib")

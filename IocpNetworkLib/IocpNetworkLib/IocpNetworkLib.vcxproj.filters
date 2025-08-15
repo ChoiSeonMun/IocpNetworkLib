@@ -26,6 +26,7 @@
     </ClInclude>
     <ClInclude Include="include\csmnet\detail\IIocpRegistrable.h" />
     <ClInclude Include="include\csmnet\detail\IocpEvent.h" />
+    <ClInclude Include="include\csmnet\detail\WinsockInitializer.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Common">

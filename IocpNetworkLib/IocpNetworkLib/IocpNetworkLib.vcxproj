@@ -24,6 +24,7 @@
     <ProjectGuid>{54836fc5-fec3-488c-8d79-d50a4ffd3233}</ProjectGuid>
     <RootNamespace>IocpNetworkLib</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>IocpNetworkLib</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -159,6 +160,8 @@
     <ClInclude Include="include\csmnet\detail\IIocpRegistrable.h" />
     <ClInclude Include="include\csmnet\detail\IocpCore.h" />
     <ClInclude Include="include\csmnet\detail\IocpEvent.h" />
+    <ClInclude Include="include\csmnet\detail\WinsockExtension.h" />
+    <ClInclude Include="include\csmnet\detail\WinsockInitializer.h" />
     <ClInclude Include="src\pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -170,6 +173,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\WinsockInitializer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
