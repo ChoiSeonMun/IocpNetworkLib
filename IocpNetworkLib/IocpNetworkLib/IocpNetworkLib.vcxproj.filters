@@ -10,6 +10,9 @@
     <ClCompile Include="src\IocpCore.cpp">
       <Filter>Detail</Filter>
     </ClCompile>
+    <ClCompile Include="src\WinsockExtension.cpp" />
+    <ClCompile Include="src\WinsockInitializer.cpp" />
+    <ClCompile Include="src\RecvBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\csmnet\common\Error.h">
@@ -24,9 +27,13 @@
     <ClInclude Include="src\pch.h">
       <Filter>Detail</Filter>
     </ClInclude>
+    <ClInclude Include="include\csmnet\detail\RecvBuffer.h">
+      <Filter>Detail</Filter>
+    </ClInclude>
     <ClInclude Include="include\csmnet\detail\IIocpRegistrable.h" />
     <ClInclude Include="include\csmnet\detail\IocpEvent.h" />
     <ClInclude Include="include\csmnet\detail\WinsockInitializer.h" />
+    <ClInclude Include="include\csmnet\detail\WinsockExtension.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Common">

@@ -162,9 +162,12 @@
     <ClInclude Include="include\csmnet\detail\IocpEvent.h" />
     <ClInclude Include="include\csmnet\detail\WinsockExtension.h" />
     <ClInclude Include="include\csmnet\detail\WinsockInitializer.h" />
+    <ClInclude Include="include\csmnet\detail\RecvBuffer.h" />
     <ClInclude Include="src\pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\RecvBuffer.cpp" />
+    <ClCompile Include="src\WinsockExtension.cpp" />
     <ClCompile Include="src\Error.cpp" />
     <ClCompile Include="src\IocpCore.cpp" />
     <ClCompile Include="src\pch.cpp">
