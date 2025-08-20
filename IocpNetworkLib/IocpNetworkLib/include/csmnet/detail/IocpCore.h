@@ -2,6 +2,8 @@
 
 #include "Config.h"
 
+#include <vector>
+
 namespace csmnet::detail
 {
     class IIocpRegistrable;
