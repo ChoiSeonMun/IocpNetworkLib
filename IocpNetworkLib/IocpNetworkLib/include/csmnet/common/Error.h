@@ -6,6 +6,7 @@
 namespace csmnet::detail
 {
     const std::error_category& GetNetworkErrorCategory() noexcept;
+    const std::error_category& GetLibErrorCategory() noexcept;
 }
 
 namespace csmnet
@@ -46,11 +47,24 @@ namespace csmnet
         WouldBlock = WSAEWOULDBLOCK,            // Operation would block
     };
 
-    
+    enum class LibError
+    {
+        FailToCreateIocpCore = 1,
+        FailToCreateAcceptor,
+        SocketAlreadyOpen,
+        SocketNotOpen,
+        SocketNotBound,
+        SocketNotListening,
+    };
 
     inline std::error_code make_error_code(NetworkError e) noexcept
     {
         return std::error_code(static_cast<int>(e), detail::GetNetworkErrorCategory());
+    }
+
+    inline std::error_code make_error_code(LibError e) noexcept
+    {
+        return std::error_code(static_cast<int>(e), detail::GetLibErrorCategory());
     }
 
     inline NetworkError TranslateWsaError(int wsaError) noexcept
@@ -62,4 +76,5 @@ namespace csmnet
 namespace std
 {
     template<> struct is_error_code_enum<csmnet::NetworkError> : true_type {};
+    template<> struct is_error_code_enum<csmnet::LibError> : true_type {};
 }
