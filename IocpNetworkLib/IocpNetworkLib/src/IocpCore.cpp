@@ -9,17 +9,6 @@ using namespace std;
 
 namespace csmnet::detail
 {
-    optional<IocpCore> IocpCore::Make() noexcept
-    {
-        HANDLE iocpHandle = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 0);
-        if (iocpHandle == NULL)
-        {
-            return nullopt;
-        }
-
-        return IocpCore(iocpHandle);
-    }
-
     void IocpCore::Register(const IIocpRegistrable& registrable) const noexcept
     {
         ::CreateIoCompletionPort(registrable.GetHandle(), _iocpHandle, 0, 0);
@@ -33,12 +22,12 @@ namespace csmnet::detail
 
         if (::GetQueuedCompletionStatus(_iocpHandle, &bytesTransferred, &key, &overlapped, INFINITE))
         {
-            return From(overlapped, bytesTransferred);
+            return IocpEvent::From(overlapped, bytesTransferred);
         }
         
         if (overlapped != nullptr)
         {
-            return From(overlapped, bytesTransferred);
+            return IocpEvent::From(overlapped, bytesTransferred);
         }
 
         return unexpected(error_code(::GetLastError(), system_category()));
@@ -69,9 +58,21 @@ namespace csmnet::detail
         {
             OVERLAPPED* overlapped = entries[i].lpOverlapped;
             DWORD bytesTransferred = entries[i].dwNumberOfBytesTransferred;
-            events[i] = From(overlapped, bytesTransferred);
+            events[i] = IocpEvent::From(overlapped, bytesTransferred);
         }
 
         return events;
+    }
+
+    expected<void, error_code> IocpCore::Open() noexcept
+    {
+        HANDLE iocpHandle = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 0);
+        if (iocpHandle == NULL)
+        {
+            return unexpected(LibError::FailToCreateIocpCore);
+        }
+        _iocpHandle = iocpHandle;
+
+        return {};
     }
 }

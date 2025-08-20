@@ -4,14 +4,13 @@
 
 namespace csmnet::detail
 {
-    class IocpRegistrable;
+    class IIocpRegistrable;
     class IocpEvent;
 
     class IocpCore final
     {
     public:
-        static optional<IocpCore> Make() noexcept;
-        
+        IocpCore() noexcept = default;
         ~IocpCore() noexcept
         {
             Close();
@@ -43,14 +42,17 @@ namespace csmnet::detail
         // 성공 값은 nullptr일 수 있다.
         expected<IocpEvent*, error_code> GetQueuedCompletionEvent() const noexcept;
         // 성공 값들 중에는 nullptr일 수 있다.
-        expected<vector<IocpEvent*>, error_code> GetQueuedCompletionEvents() const noexcept;
+        expected<std::vector<IocpEvent*>, error_code> GetQueuedCompletionEvents() const noexcept;
 
-        bool IsValid() const noexcept { return _iocpHandle != INVALID_HANDLE_VALUE; }
-
+        expected<void, error_code> Open() noexcept;
+        bool IsOpen() const noexcept { return _iocpHandle != INVALID_HANDLE_VALUE; }
         void Close() noexcept
         {
-            CloseHandle(_iocpHandle);
-            _iocpHandle = INVALID_HANDLE_VALUE;
+            if (IsOpen())
+            {
+                CloseHandle(_iocpHandle);
+                _iocpHandle = INVALID_HANDLE_VALUE;
+            }
         }
     private:
         explicit IocpCore(HANDLE iocpHandle) noexcept
