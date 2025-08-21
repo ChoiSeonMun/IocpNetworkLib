@@ -43,4 +43,23 @@ namespace csmnet::detail
     private:
         linger _linger{ 0, 0 };
     };
+
+    template <int Level, int Name>
+    class UpdateAcceptContext final
+    {
+    public:
+        UpdateAcceptContext() noexcept = default;
+        explicit UpdateAcceptContext(SOCKET listenSocket) noexcept
+            : _listenSocket(listenSocket)
+        {
+        }
+
+        int GetLevel() const noexcept { return Level; }
+        int GetName() const noexcept { return Name; }
+        void* GetData() noexcept { return &_listenSocket; }
+        const void* GetData() const noexcept { return &_listenSocket; }
+        size_t GetSize() const noexcept { return sizeof(_listenSocket); }
+    private:
+        SOCKET _listenSocket = INVALID_SOCKET;
+    };
 }
