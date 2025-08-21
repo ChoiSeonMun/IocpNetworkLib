@@ -49,10 +49,46 @@ namespace csmnet::detail
         }
     };
 
+    class LibErrorCategory : public error_category
+    {
+    public:
+        const char* name() const noexcept override
+        {
+            return "csmnet";
+        }
+
+        string message(int value) const override
+        {
+            switch (static_cast<LibError>(value))
+            {
+            case LibError::FailToCreateIocpCore:
+                return "Failed to create IOCP core";
+            case LibError::FailToCreateAcceptor:
+                return "Failed to create acceptor";
+            case LibError::SocketAlreadyOpen:
+                return "Socket is already open";
+            case LibError::SocketNotOpen:
+                return "Socket is not open";
+            case LibError::SocketNotBound:
+                return "Socket is not bound";
+            case LibError::SocketNotListening:
+                return "Socket is not listening";
+            default:
+                return "Unknown library error";
+            };
+        }
+    };
+
     const std::error_category& GetNetworkErrorCategory() noexcept
     {
-        static NetworkCategory instance;
-        return instance;
+        static NetworkCategory s_instance;
+        return s_instance;
+    }
+
+    const std::error_category& GetLibErrorCategory() noexcept
+    {
+        static LibErrorCategory s_instance;
+        return s_instance;
     }
 }
 
