@@ -16,7 +16,9 @@ namespace csmnet::detail
         Tcp,
         Udp
     };
-
+    
+    class SendEvent;
+    class RecvEvent;
     class AcceptEvent;
     class ConnectEvent;
     class DisconnectEvent;
@@ -53,8 +55,10 @@ namespace csmnet::detail
         expected<void, error_code> Bind(const Endpoint& local) noexcept;
         expected<void, error_code> Listen(int32 backlog = SOMAXCONN) noexcept;
         expected<void, error_code> AcceptEx(AcceptEvent& event) noexcept;
-        expected<void, error_code> ConnectEx(const Endpoint& remote, ConnectEvent& event) noexcept;
+        expected<void, error_code> ConnectEx(ConnectEvent& event) noexcept;
         expected<void, error_code> DisconnectEx(DisconnectEvent& event) noexcept;
+        expected<void, error_code> SendEx(SendEvent& event) noexcept;
+        expected<void, error_code> RecvEx(RecvEvent& event) noexcept;
 
         template <typename SocketOption>
         void SetOption(const SocketOption& option) noexcept

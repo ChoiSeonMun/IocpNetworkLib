@@ -5,6 +5,7 @@
 #include "RecvBuffer.h"
 
 #include <array>
+#include <span>
 
 #define DEFINE_PROCESS(iocp_event) virtual void Process(class iocp_event* event) { }
 #define IOCP_EVENT_DEFAULT_IMPL() \
@@ -97,6 +98,25 @@ namespace csmnet::detail
     {
     public:
         IOCP_EVENT_DEFAULT_IMPL()
+           
+        void Reset() noexcept override
+        {
+            IocpEvent::Reset();
+            _remote = Endpoint::Any(0);
+        }
+        
+        void SetRemote(const Endpoint& remote) noexcept
+        {
+            _remote = remote;
+        }
+
+        const Endpoint& GetRemote() const noexcept
+        {
+            return _remote;
+        }
+
+    private:
+        Endpoint _remote = Endpoint::Any(0);
     };
 
     class RecvEvent final : public IocpEvent
@@ -104,8 +124,23 @@ namespace csmnet::detail
     public:
         IOCP_EVENT_DEFAULT_IMPL()
 
+        void Reset() noexcept override
+        {
+            IocpEvent::Reset();
+            _wsaBuf.len = 0;
+            _wsaBuf.buf = nullptr;
+        }
+
+        void SetData(span<char> data) noexcept
+        {
+            _wsaBuf.buf = data.data();
+            _wsaBuf.len = static_cast<ULONG>(data.size());
+        }
+
+        WSABUF* GetData() noexcept { return &_wsaBuf; }
+        size_t GetBufferCount() const noexcept { return 1; }
     private:
-        RecvBuffer _buffer;
+        WSABUF _wsaBuf;
     };
 
     class SendEvent final : public IocpEvent
@@ -113,7 +148,23 @@ namespace csmnet::detail
     public:
         IOCP_EVENT_DEFAULT_IMPL()
 
-        std::vector<char> _buffer;
+        void Reset() noexcept override
+        {
+            IocpEvent::Reset();
+            _wsaBuf.len = 0;
+            _wsaBuf.buf = nullptr;
+        }
+
+        void SetData(span<char> data) noexcept
+        {
+            _wsaBuf.buf = data.data();
+            _wsaBuf.len = static_cast<ULONG>(data.size());
+        }
+
+        WSABUF* GetData() noexcept { return &_wsaBuf; }
+        size_t GetBufferCount() const noexcept { return 1; }
+    private:
+        WSABUF _wsaBuf;        
     };
 
     class DisconnectEvent final : public IocpEvent

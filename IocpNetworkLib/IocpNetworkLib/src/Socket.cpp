@@ -131,7 +131,7 @@ namespace csmnet::detail
         return {};
     }
 
-    expected<void, error_code> Socket::ConnectEx(const Endpoint& remote, ConnectEvent& event) noexcept
+    expected<void, error_code> Socket::ConnectEx(ConnectEvent& event) noexcept
     {
         if (IsOpen() == false)
         {
@@ -145,8 +145,8 @@ namespace csmnet::detail
 
         BOOL result = WinsockExtension::ConnectEx(
             _socket,
-            remote.GetNative(),
-            remote.GetSize(),
+            event.GetRemote().GetNative(),
+            event.GetRemote().GetSize(),
             nullptr,
             0,
             reinterpret_cast<LPDWORD>(event.GetBytesTransferredData()),
@@ -176,12 +176,48 @@ namespace csmnet::detail
             0
         );
 
-        if (!result)
+        if (!result && WSAGetLastError() != WSA_IO_PENDING)
         {
             return unexpected(TranslateWsaError(WSAGetLastError()));
         }
 
         _state = SocketState::Closed;
+        return {};
+    }
+
+    expected<void, error_code> Socket::SendEx(SendEvent& event) noexcept
+    {
+        auto result = WSASend(_socket,
+            event.GetData(),
+            event.GetBufferCount(),
+            nullptr,
+            0,
+            event.GetOverlapped(),
+            nullptr);
+
+        if (result == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING)
+        {
+            return unexpected(TranslateWsaError(WSAGetLastError()));
+        }
+
+        return {};
+    }
+
+    expected<void, error_code> Socket::RecvEx(RecvEvent& event) noexcept
+    {
+        auto result = WSARecv(_socket,
+            event.GetData(),
+            event.GetBufferCount(),
+            nullptr,
+            0,
+            event.GetOverlapped(),
+            nullptr);
+
+        if (result == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING)
+        {
+            return unexpected(TranslateWsaError(WSAGetLastError()));
+        }
+
         return {};
     }
 }
