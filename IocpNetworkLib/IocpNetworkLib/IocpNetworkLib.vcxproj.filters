@@ -10,9 +10,21 @@
     <ClCompile Include="src\IocpCore.cpp">
       <Filter>Detail</Filter>
     </ClCompile>
+    <ClCompile Include="src\Socket.cpp" />
+    <ClCompile Include="src\Endpoint.cpp" />
+    <ClCompile Include="src\Acceptor.cpp" />
+    <ClCompile Include="src\IocpEvent.cpp" />
+    <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\WinsockExtension.cpp" />
+    <ClCompile Include="src\Client.cpp" />
     <ClCompile Include="src\WinsockInitializer.cpp" />
-    <ClCompile Include="src\RecvBuffer.cpp" />
+    <ClCompile Include="src\RecvBuffer.cpp">
+      <Filter>Detail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SendBuffer.cpp">
+      <Filter>Detail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SpdLogger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\csmnet\common\Error.h">
@@ -32,8 +44,19 @@
     </ClInclude>
     <ClInclude Include="include\csmnet\detail\IIocpRegistrable.h" />
     <ClInclude Include="include\csmnet\detail\IocpEvent.h" />
+    <ClInclude Include="include\csmnet\detail\SocketOption.h" />
+    <ClInclude Include="include\csmnet\detail\Socket.h" />
+    <ClInclude Include="include\csmnet\Endpoint.h" />
+    <ClInclude Include="include\csmnet\detail\Acceptor.h" />
+    <ClInclude Include="include\csmnet\Server.h" />
     <ClInclude Include="include\csmnet\detail\WinsockInitializer.h" />
+    <ClInclude Include="include\csmnet\Client.h" />
     <ClInclude Include="include\csmnet\detail\WinsockExtension.h" />
+    <ClInclude Include="include\csmnet\detail\SendBuffer.h">
+      <Filter>Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\csmnet\util\ILogger.h" />
+    <ClInclude Include="include\csmnet\util\SpdLogger.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Common">
