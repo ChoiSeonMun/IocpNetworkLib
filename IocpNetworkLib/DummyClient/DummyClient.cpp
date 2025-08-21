@@ -2,6 +2,7 @@
 //
 
 #include <csmnet/Client.h>
+#include <csmnet/util/SpdLogger.h>
 
 #include <iostream>
 #include <print>
@@ -38,7 +39,7 @@ int main()
         std::cin >> input;
         if (input == 'q' || input == 'Q')
         {
-            client.Close();
+            client.Disconnect();
             break;
         }
     }

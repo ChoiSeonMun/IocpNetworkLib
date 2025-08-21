@@ -19,7 +19,7 @@ namespace csmnet::detail
 
     class AcceptEvent;
     class ConnectEvent;
-
+    class DisconnectEvent;
     enum class SocketState
     {
         Closed,
@@ -54,6 +54,7 @@ namespace csmnet::detail
         expected<void, error_code> Listen(int32 backlog = SOMAXCONN) noexcept;
         expected<void, error_code> AcceptEx(AcceptEvent& event) noexcept;
         expected<void, error_code> ConnectEx(const Endpoint& remote, ConnectEvent& event) noexcept;
+        expected<void, error_code> DisconnectEx(DisconnectEvent& event) noexcept;
 
         template <typename SocketOption>
         void SetOption(const SocketOption& option) noexcept

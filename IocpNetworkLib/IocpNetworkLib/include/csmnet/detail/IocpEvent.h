@@ -2,8 +2,15 @@
 
 #include "Config.h"
 #include "Socket.h"
+#include "RecvBuffer.h"
 
 #include <array>
+
+#define DEFINE_PROCESS(iocp_event) virtual void Process(class iocp_event* event) { }
+#define IOCP_EVENT_DEFAULT_IMPL() \
+    using IocpEvent::IocpEvent; \
+    void Process() override  { GetProcessor()->Process(this); }
+
 
 namespace csmnet::detail
 {
@@ -11,10 +18,12 @@ namespace csmnet::detail
     {
     public:
         virtual ~IIocpEventProcessor() noexcept = default;
-        virtual void Process(class AcceptEvent* event) {}
-        virtual void Process(class ConnectEvent* event) {}
-        virtual void Process(class RecvEvent* event) {}
-        virtual void Process(class SendEvent* event) {}
+
+        DEFINE_PROCESS(AcceptEvent)
+        DEFINE_PROCESS(ConnectEvent)
+        DEFINE_PROCESS(RecvEvent)
+        DEFINE_PROCESS(SendEvent)
+        DEFINE_PROCESS(DisconnectEvent)
     };
 
     class IocpEvent
@@ -33,7 +42,7 @@ namespace csmnet::detail
             return event;
         }
 
-        explicit IocpEvent(IIocpEventProcessor* processor);
+        explicit IocpEvent(IIocpEventProcessor* processor) : _processor(processor) {}
         virtual ~IocpEvent() noexcept = default;
 
         virtual void Process() = 0;
@@ -63,12 +72,7 @@ namespace csmnet::detail
     class AcceptEvent final : public IocpEvent
     {
     public:
-        explicit AcceptEvent(IIocpEventProcessor* processor);
-
-        void Process() override
-        {
-            GetProcessor()->Process(this);
-        };
+        IOCP_EVENT_DEFAULT_IMPL()
 
         void Reset() noexcept override
         {
@@ -92,34 +96,30 @@ namespace csmnet::detail
     class ConnectEvent final : public IocpEvent
     {
     public:
-        using IocpEvent::IocpEvent;
-
-        void Process() override
-        {
-            GetProcessor()->Process(this);
-        };
+        IOCP_EVENT_DEFAULT_IMPL()
     };
 
     class RecvEvent final : public IocpEvent
     {
     public:
-        using IocpEvent::IocpEvent;
+        IOCP_EVENT_DEFAULT_IMPL()
 
-        void Process() override
-        {
-            GetProcessor()->Process(this);
-        };
+    private:
+        RecvBuffer _buffer;
     };
 
     class SendEvent final : public IocpEvent
     {
     public:
-        using IocpEvent::IocpEvent;
+        IOCP_EVENT_DEFAULT_IMPL()
 
-        void Process() override
-        {
-            GetProcessor()->Process(this);
-        };
+        std::vector<char> _buffer;
+    };
+
+    class DisconnectEvent final : public IocpEvent
+    {
+    public:
+        IOCP_EVENT_DEFAULT_IMPL()
     };
 }
 

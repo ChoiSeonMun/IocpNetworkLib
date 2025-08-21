@@ -55,6 +55,7 @@ namespace csmnet
         SocketNotOpen,
         SocketNotBound,
         SocketNotListening,
+        SocketNotConnected,
     };
 
     inline std::error_code make_error_code(NetworkError e) noexcept

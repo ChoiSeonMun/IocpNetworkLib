@@ -161,4 +161,27 @@ namespace csmnet::detail
         _state = SocketState::Connected;
         return {};
     }
+
+    expected<void, error_code> Socket::DisconnectEx(DisconnectEvent& event) noexcept
+    {
+        if (_state != SocketState::Connected)
+        {
+            return unexpected(LibError::SocketNotConnected);
+        }
+
+        BOOL result = WinsockExtension::DisconnectEx(
+            _socket,
+            event.GetOverlapped(),
+            TF_REUSE_SOCKET,
+            0
+        );
+
+        if (!result)
+        {
+            return unexpected(TranslateWsaError(WSAGetLastError()));
+        }
+
+        _state = SocketState::Closed;
+        return {};
+    }
 }

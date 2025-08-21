@@ -10,6 +10,7 @@ namespace csmnet::detail
         friend class WinsockInitializer;
     public:
         static LPFN_CONNECTEX ConnectEx;
+        static LPFN_DISCONNECTEX DisconnectEx;
 
     private:
         static void Init() noexcept;

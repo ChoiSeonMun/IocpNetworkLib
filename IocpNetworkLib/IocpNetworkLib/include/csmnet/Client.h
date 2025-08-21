@@ -14,29 +14,25 @@ namespace csmnet
     {
     public:
         Client() noexcept = default;
-        virtual ~Client() noexcept;
+        virtual ~Client() noexcept = default;
         Client(const Client&) = delete;
         Client& operator=(const Client&) = delete;
         Client(Client&&) noexcept = default;
         Client& operator=(Client&&) noexcept = default;
 
         expected<void, error_code> Connect(const Endpoint& serverEndpoint) noexcept;
-        void Close() noexcept;
+        expected<void, error_code> Disconnect() noexcept;
     private:
-        // Implement the IIocpEventProcessor interface
-        void Process(detail::AcceptEvent* event) override;
         void Process(detail::ConnectEvent* event) override;
-        void Process(detail::RecvEvent* event) override;
-        void Process(detail::SendEvent* event) override;
-
+        void Process(detail::DisconnectEvent* event) override;
     private:
         void ProcessIO();
-
     private:
         std::atomic<bool> _isConnected{ false };
         detail::IocpCore _iocpCore;
         detail::Socket _socket;
         detail::ConnectEvent _connectEvent{ this };
-        std::thread _ioThread;
+        detail::DisconnectEvent _disconnectEvent{ this };
+        std::jthread _ioThread;
     };
 }

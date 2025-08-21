@@ -73,6 +73,8 @@ namespace csmnet::detail
                 return "Socket is not bound";
             case LibError::SocketNotListening:
                 return "Socket is not listening";
+            case LibError::SocketNotConnected:
+                return "Socket is not connected";
             default:
                 return "Unknown library error";
             };
