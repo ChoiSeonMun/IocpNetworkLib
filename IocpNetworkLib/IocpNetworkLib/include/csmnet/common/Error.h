@@ -51,11 +51,16 @@ namespace csmnet
     {
         FailToCreateIocpCore = 1,
         FailToCreateAcceptor,
+        IocpCoreNotOpen,
         SocketAlreadyOpen,
+        InvalidSocket,
         SocketNotOpen,
         SocketNotBound,
         SocketNotListening,
         SocketNotConnected,
+        CannotCreateSession,
+        MemoryAllocationFailed,
+        SessionClosed,
     };
 
     inline std::error_code make_error_code(NetworkError e) noexcept

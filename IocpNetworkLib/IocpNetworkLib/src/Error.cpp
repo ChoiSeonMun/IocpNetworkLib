@@ -65,6 +65,8 @@ namespace csmnet::detail
                 return "Failed to create IOCP core";
             case LibError::FailToCreateAcceptor:
                 return "Failed to create acceptor";
+            case LibError::IocpCoreNotOpen:
+                return "IOCP core is not open";
             case LibError::SocketAlreadyOpen:
                 return "Socket is already open";
             case LibError::SocketNotOpen:
@@ -75,6 +77,14 @@ namespace csmnet::detail
                 return "Socket is not listening";
             case LibError::SocketNotConnected:
                 return "Socket is not connected";
+            case LibError::CannotCreateSession:
+                return "Cannot create session. Check the factory of the session.";
+            case LibError::InvalidSocket:
+                return "Invalid socket";
+            case LibError::MemoryAllocationFailed:
+                return "Memory allocation failed";
+            case LibError::SessionClosed:
+                return "Session is closed";
             default:
                 return "Unknown library error";
             };
