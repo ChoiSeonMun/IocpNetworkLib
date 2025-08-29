@@ -15,25 +15,44 @@ namespace csmnet::util
     class ObjectPool
     {
     public:
+        using Pool = std::stack<T*, std::vector<T*>>;
         using PooledObject = util::PooledObject<T>;
         using ObjectFactory = std::function<T()>;
         using ResetAction = std::function<void(T*)>;
     public:
-        ObjectPool(size_t poolSize, ObjectFactory objectFactory = nullptr, ResetAction resetAction = nullptr)
-            :
-            _resetAction(resetAction),
+        static expected<ObjectPool, error_code> Create(size_t poolSize, ObjectFactory objectFactory, ResetAction resetAction) noexcept
         {
-            if (objectFactory)
+            try
             {
+                Container container;
+                container.reserve(poolSize);
+
+                std::function<T()> lambdaCtor{ };
+                if (objectFactory)
+                {
+                    lambdaCtor = std::move(objectFactory);
+                }
+                else
+                {
+                    lambdaCtor = []() { return T(); };
+                }
+
                 for (size_t i = 0; i < poolSize; ++i)
                 {
-                    _container.emplace_back(objectFactory());
+                    container.push_back(lambdaCtor());
                 }
-            }
 
-            for (auto& obj : _container)
+                Pool pool;
+                for (auto& obj : container)
+                {
+                    pool.push(&obj);
+                }
+
+                return ObjectPool(std::move(resetAction), std::move(container), std::move(pool));
+            }
+            catch (const std::bad_alloc&)
             {
-                _pool.push(&obj);
+                return std::unexpected(LibError::MemoryAllocationFailed);
             }
         }
 
@@ -64,6 +83,14 @@ namespace csmnet::util
             return PooledObject(obj, deleter);
         }
     private:
+        ObjectPool(ResetAction&& resetAction, Container&& container, Pool&& pool) noexcept
+            :
+            _resetAction(std::move(resetAction)),
+            _container(std::move(container)),
+            _pool(std::move(pool))
+        {
+        }
+
         void Push(T* object) noexcept
         {
             _pool.push(object);
@@ -71,6 +98,6 @@ namespace csmnet::util
     private:
         ResetAction _resetAction;
         Container _container;
-        std::stack<T*, std::vector<T*>> _pool;
+        Pool _pool;
     };
 }
