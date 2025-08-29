@@ -16,12 +16,22 @@ namespace csmnet::util
     {
     public:
         using PooledObject = util::PooledObject<T>;
+        using ObjectFactory = std::function<T()>;
         using ResetAction = std::function<void(T*)>;
     public:
-        ObjectPool(size_t poolSize, ResetAction resetAction)
-            :_resetAction(resetAction),
-            _container(poolSize)
+        ObjectPool(size_t poolSize, ObjectFactory objectFactory = nullptr, ResetAction resetAction = nullptr)
+            :
+            _objectFactory(objectFactory),
+            _resetAction(resetAction),
         {
+            if (_objectFactory)
+            {
+                for (size_t i = 0; i < poolSize; ++i)
+                {
+                    _container.emplace_back(_objectFactory());
+                }
+            }
+
             for (auto& obj : _container)
             {
                 _pool.push(&obj);
@@ -43,8 +53,12 @@ namespace csmnet::util
 
             T* obj = _pool.top();
             _pool.pop();
-            _resetAction(obj);
-
+            
+            if (_resetAction)
+            {
+                _resetAction(obj);
+            }
+            
             auto deleter = [this](T* p) { Push(p); };
 
             return PooledObject(obj, deleter);
@@ -55,6 +69,7 @@ namespace csmnet::util
             _pool.push(object);
         }
     private:
+        ObjectFactory _objectFactory;
         ResetAction _resetAction;
         Container _container;
         std::stack<T*, std::vector<T*>> _pool;
