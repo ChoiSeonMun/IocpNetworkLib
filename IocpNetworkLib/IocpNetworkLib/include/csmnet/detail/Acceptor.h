@@ -5,14 +5,16 @@
 #include "IocpEvent.h"
 #include "Socket.h"
 
+namespace csmnet::util { class ILogger; }
+
 namespace csmnet::detail
 {
+    class IServerApiForAcceptor;
     class IocpCore;
-
     class Acceptor final : public IIocpEventProcessor
     {
     public:
-        Acceptor(IocpCore& iocpCore, const uint32 maxSessionCount);
+        Acceptor(util::ILogger& logger, IocpCore& iocpCore, IServerApiForAcceptor& server);
 
         Acceptor(const Acceptor&) = delete;
         Acceptor& operator=(const Acceptor&) = delete;
@@ -28,9 +30,11 @@ namespace csmnet::detail
     private:
         expected<void, error_code> PostAccept() noexcept;
     private:
-        uint32 _maxSessionCount;
+        util::ILogger& _logger;
+        IServerApiForAcceptor& _server;
         IocpCore& _iocpCore;
+        
         Socket _listenSocket;
-        AcceptEvent _acceptEvent;
+        AcceptEvent _acceptEvent{ this };
     };
 }

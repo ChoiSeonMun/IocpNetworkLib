@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "csmnet/detail/Acceptor.h"
 #include "csmnet/detail/IocpCore.h"
+#include "csmnet/Server.h"
+#include "csmnet/util/ILogger.h"
 
 #include <print>
 
@@ -25,8 +27,11 @@ namespace csmnet::detail
                 });
     }
 
-    Acceptor::Acceptor(IocpCore& iocpCore, const uint32 maxSessionCount)
-        : _iocpCore(iocpCore), _maxSessionCount(maxSessionCount), _acceptEvent(this)
+    Acceptor::Acceptor(util::ILogger& logger, IocpCore& iocpCore, IServerApiForAcceptor& server)
+        :
+        _logger(logger),
+        _iocpCore(iocpCore),
+        _server(server)
     {
     }
 
@@ -37,16 +42,40 @@ namespace csmnet::detail
 
     void Acceptor::Process(AcceptEvent* event)
     {
-        // TODO: 연결 처리.
-        println("New connection accepted");
+        Socket acceptedSocket = std::move(event->GetAcceptSocket());
+        acceptedSocket.SetOption(Socket::UpdateAcceptContext{ _listenSocket });
+        Endpoint remote = event->GetRemote();
+
+        auto session = _server.GetSession();
+        if (session)
+        {
+            session->SetConnection(std::move(event->GetAcceptSocket()), std::move(remote));
+            _server.AddSession(session);
+            session->OnConnected();
+        }
+        else
+        {
+            _logger.Info(format("Acceptor::Process - No available session. Closing {}:{}", remote.GetIp(), remote.GetPort()));
+        }
         
-        PostAccept();
+        if (auto result = PostAccept(); !result)
+        {
+            _logger.Error(format("Acceptor::Process - Fail to accept: [{}] {}", result.error().value(), result.error().message()));
+            _logger.Error(format("Acceptor::Process - Stopping accepting new connections."));
+            Close();
+        }
     }
 
     expected<void, error_code> Acceptor::PostAccept() noexcept
     {
-        _acceptEvent.Reset();
-        return _listenSocket.AcceptEx(_acceptEvent);    
+        Socket acceptSocket;
+        return acceptSocket.Open(SocketType::Tcp)
+            .and_then([this, &acceptSocket]()
+                {
+                    _acceptEvent.Reset();
+                    _acceptEvent.PrepareSocket(std::move(acceptSocket));
+                    return _listenSocket.AcceptEx(_acceptEvent);
+                });
     }
 }
 

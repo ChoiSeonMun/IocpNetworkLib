@@ -3,6 +3,7 @@
 #include "Config.h"
 #include "Socket.h"
 #include "RecvBuffer.h"
+#include "csmnet/util/ObjectPool.h"
 
 #include <array>
 #include <span>
@@ -78,17 +79,39 @@ namespace csmnet::detail
         void Reset() noexcept override
         {
             IocpEvent::Reset();
-            
-            _acceptSocket.Close();
-            _acceptSocket.Open(SocketType::Tcp);
 
             ::memset(_buffer.data(), 0, _buffer.size());
+        }
+        
+        void PrepareSocket(Socket&& socket) noexcept
+        {
+            _acceptSocket = std::move(socket);
         }
 
         Socket& GetAcceptSocket() noexcept { return _acceptSocket; }
         const Socket& GetAcceptSocket() const noexcept { return _acceptSocket; }
         void* GetBuffer() noexcept { return _buffer.data(); }
         const void* GetBuffer() const noexcept { return _buffer.data(); }
+        Endpoint GetRemote() noexcept
+        {
+            sockaddr_in* local = nullptr;
+            socklen_t localAddrLen = sizeof(sockaddr_in);
+            sockaddr_in* remote = nullptr;
+            socklen_t remoteAddrLen = sizeof(sockaddr_in);
+
+            ::GetAcceptExSockaddrs(
+                _buffer.data(),
+                _buffer.size(),
+                sizeof(sockaddr_in) + 16,
+                sizeof(sockaddr_in) + 16,
+                reinterpret_cast<sockaddr**>(&local),
+                &localAddrLen,
+                reinterpret_cast<sockaddr**>(&remote),
+                &remoteAddrLen);
+
+
+            return Endpoint(*remote);
+        }
     private:
         Socket _acceptSocket;
         std::array<char, 1024> _buffer;
@@ -129,6 +152,11 @@ namespace csmnet::detail
             IocpEvent::Reset();
             _wsaBuf.len = 0;
             _wsaBuf.buf = nullptr;
+        }
+
+        void SetData(char* buffer, const size_t size) noexcept
+        {
+            SetData(span(buffer, size));
         }
 
         void SetData(span<char> data) noexcept
