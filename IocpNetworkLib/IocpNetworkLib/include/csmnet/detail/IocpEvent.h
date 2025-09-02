@@ -11,7 +11,7 @@
 #define DEFINE_PROCESS(iocp_event) virtual void Process(class iocp_event* event) { }
 #define IOCP_EVENT_DEFAULT_IMPL() \
     using IocpEvent::IocpEvent; \
-    void Process() override  { _processor->Process(this); }
+    void Process() override  { _processor.Process(this); }
 
 
 namespace csmnet::detail
@@ -44,7 +44,11 @@ namespace csmnet::detail
             return event;
         }
 
-        explicit IocpEvent(IIocpEventProcessor* processor) : _processor(processor) {}
+        explicit IocpEvent(IIocpEventProcessor& processor) : _processor(processor) {}
+        IocpEvent(const IocpEvent&) = delete;
+        IocpEvent& operator=(const IocpEvent&) = delete;
+        IocpEvent(IocpEvent&&) = delete;
+        IocpEvent& operator=(IocpEvent&&) = delete;
         virtual ~IocpEvent() noexcept = default;
 
         virtual void Process() = 0;
@@ -61,7 +65,7 @@ namespace csmnet::detail
         }
 
     protected:
-        IIocpEventProcessor* _processor = nullptr;
+        IIocpEventProcessor& _processor;
         
     private:
         uint32 _bytesTransferred = 0;
