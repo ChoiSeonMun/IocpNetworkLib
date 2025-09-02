@@ -92,26 +92,6 @@ namespace csmnet::detail
         const Socket& GetAcceptSocket() const noexcept { return _acceptSocket; }
         void* GetBuffer() noexcept { return _buffer.data(); }
         const void* GetBuffer() const noexcept { return _buffer.data(); }
-        Endpoint GetRemote() noexcept
-        {
-            sockaddr_in* local = nullptr;
-            socklen_t localAddrLen = sizeof(sockaddr_in);
-            sockaddr_in* remote = nullptr;
-            socklen_t remoteAddrLen = sizeof(sockaddr_in);
-
-            ::GetAcceptExSockaddrs(
-                _buffer.data(),
-                _buffer.size(),
-                sizeof(sockaddr_in) + 16,
-                sizeof(sockaddr_in) + 16,
-                reinterpret_cast<sockaddr**>(&local),
-                &localAddrLen,
-                reinterpret_cast<sockaddr**>(&remote),
-                &remoteAddrLen);
-
-
-            return Endpoint(*remote);
-        }
     private:
         Socket _acceptSocket;
         std::array<char, 1024> _buffer;
@@ -145,11 +125,20 @@ namespace csmnet::detail
     class RecvEvent final : public IocpEvent
     {
     public:
-        IOCP_EVENT_DEFAULT_IMPL()
+        //IOCP_EVENT_DEFAULT_IMPL()
+        using IocpEvent::IocpEvent;
+
+        void Process() override 
+        {
+            auto processor = GetProcessor();
+            processor->Process(this);
+        }
 
         void Reset() noexcept override
         {
             IocpEvent::Reset();
+
+            _flags = 0;
             _wsaBuf.len = 0;
             _wsaBuf.buf = nullptr;
         }
@@ -165,9 +154,11 @@ namespace csmnet::detail
             _wsaBuf.len = static_cast<ULONG>(data.size());
         }
 
+        uint32* GetFlagsData() noexcept { return &_flags; }
         WSABUF* GetData() noexcept { return &_wsaBuf; }
         size_t GetBufferCount() const noexcept { return 1; }
     private:
+        uint32 _flags{ 0 };
         WSABUF _wsaBuf;
     };
 
