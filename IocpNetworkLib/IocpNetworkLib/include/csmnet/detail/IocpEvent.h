@@ -11,7 +11,7 @@
 #define DEFINE_PROCESS(iocp_event) virtual void Process(class iocp_event* event) { }
 #define IOCP_EVENT_DEFAULT_IMPL() \
     using IocpEvent::IocpEvent; \
-    void Process() override  { GetProcessor()->Process(this); }
+    void Process() override  { _processor->Process(this); }
 
 
 namespace csmnet::detail
@@ -48,25 +48,22 @@ namespace csmnet::detail
         virtual ~IocpEvent() noexcept = default;
 
         virtual void Process() = 0;
-        
-        virtual void Reset() noexcept
+
+        uint32 GetBytesTransferred() const noexcept { return _bytesTransferred; }
+
+        uint32* GetBytesTransferredData() noexcept { return &_bytesTransferred; }
+        OVERLAPPED* GetOverlappedData() noexcept { return &_overlapped; }
+    protected:
+        void Reset() noexcept
         {
             ::memset(&_overlapped, 0, sizeof(_overlapped));
             _bytesTransferred = 0;
         }
 
-        uint32 GetBytesTransferred() const noexcept { return _bytesTransferred; }
-
-        uint32* GetBytesTransferredData() noexcept { return &_bytesTransferred; }
-        const uint32* GetBytesTransferredData() const noexcept { return &_bytesTransferred; }
-        OVERLAPPED* GetOverlapped() noexcept { return &_overlapped; }
-        const OVERLAPPED* GetOverlapped() const noexcept { return &_overlapped; }
-
     protected:
-        IIocpEventProcessor* GetProcessor() noexcept { return _processor; }
+        IIocpEventProcessor* _processor = nullptr;
         
     private:
-        IIocpEventProcessor* _processor = nullptr;
         uint32 _bytesTransferred = 0;
         OVERLAPPED _overlapped = {};
     };
@@ -76,22 +73,17 @@ namespace csmnet::detail
     public:
         IOCP_EVENT_DEFAULT_IMPL()
 
-        void Reset() noexcept override
+        void Reset(Socket&& socket) noexcept
         {
-            IocpEvent::Reset();
+            CSM_ASSERT(socket.IsValid());
 
+            IocpEvent::Reset();
+            _acceptSocket = std::move(socket);
             ::memset(_buffer.data(), 0, _buffer.size());
         }
         
-        void PrepareSocket(Socket&& socket) noexcept
-        {
-            _acceptSocket = std::move(socket);
-        }
-
         Socket& GetAcceptSocket() noexcept { return _acceptSocket; }
-        const Socket& GetAcceptSocket() const noexcept { return _acceptSocket; }
         void* GetBuffer() noexcept { return _buffer.data(); }
-        const void* GetBuffer() const noexcept { return _buffer.data(); }
     private:
         Socket _acceptSocket;
         std::array<char, 1024> _buffer;
@@ -102,17 +94,12 @@ namespace csmnet::detail
     public:
         IOCP_EVENT_DEFAULT_IMPL()
            
-        void Reset() noexcept override
+        void Reset(const Endpoint& remote) noexcept
         {
             IocpEvent::Reset();
-            _remote = Endpoint::Any(0);
-        }
-        
-        void SetRemote(const Endpoint& remote) noexcept
-        {
             _remote = remote;
         }
-
+        
         const Endpoint& GetRemote() const noexcept
         {
             return _remote;
@@ -125,33 +112,17 @@ namespace csmnet::detail
     class RecvEvent final : public IocpEvent
     {
     public:
-        //IOCP_EVENT_DEFAULT_IMPL()
-        using IocpEvent::IocpEvent;
+        IOCP_EVENT_DEFAULT_IMPL()
 
-        void Process() override 
+        void Reset(span<byte> buffer) noexcept
         {
-            auto processor = GetProcessor();
-            processor->Process(this);
-        }
+            CSM_ASSERT(buffer.data() != nullptr);
+            CSM_ASSERT(buffer.empty() == false);
 
-        void Reset() noexcept override
-        {
             IocpEvent::Reset();
 
-            _flags = 0;
-            _wsaBuf.len = 0;
-            _wsaBuf.buf = nullptr;
-        }
-
-        void SetData(char* buffer, const size_t size) noexcept
-        {
-            SetData(span(buffer, size));
-        }
-
-        void SetData(span<char> data) noexcept
-        {
-            _wsaBuf.buf = data.data();
-            _wsaBuf.len = static_cast<ULONG>(data.size());
+            _wsaBuf.len = static_cast<ULONG>(buffer.size());
+            _wsaBuf.buf = reinterpret_cast<char*>(buffer.data());
         }
 
         uint32* GetFlagsData() noexcept { return &_flags; }
@@ -167,23 +138,20 @@ namespace csmnet::detail
     public:
         IOCP_EVENT_DEFAULT_IMPL()
 
-        void Reset() noexcept override
+        void Reset(span<byte> buffer) noexcept
         {
-            IocpEvent::Reset();
-            _wsaBuf.len = 0;
-            _wsaBuf.buf = nullptr;
-        }
+            CSM_ASSERT(buffer.data() != nullptr);
+            CSM_ASSERT(buffer.empty() == false);
 
-        void SetData(span<char> data) noexcept
-        {
-            _wsaBuf.buf = data.data();
-            _wsaBuf.len = static_cast<ULONG>(data.size());
+            IocpEvent::Reset();
+            _wsaBuf.len = static_cast<ULONG>(buffer.size());
+            _wsaBuf.buf = reinterpret_cast<char*>(buffer.data());
         }
 
         WSABUF* GetData() noexcept { return &_wsaBuf; }
         size_t GetBufferCount() const noexcept { return 1; }
     private:
-        WSABUF _wsaBuf;        
+        WSABUF _wsaBuf;
     };
 
     class DisconnectEvent final : public IocpEvent
