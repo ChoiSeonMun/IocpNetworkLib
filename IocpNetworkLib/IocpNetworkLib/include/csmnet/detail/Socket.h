@@ -11,26 +11,20 @@ namespace csmnet::detail
 {
     using namespace std;
 
-    enum class SocketType
-    {
-        Tcp,
-        Udp
-    };
-    
     class SendEvent;
     class RecvEvent;
     class AcceptEvent;
     class ConnectEvent;
     class DisconnectEvent;
-    enum class SocketState
+
+    enum class ShutdownKind
     {
-        Closed,
-        Opened,
-        Bound,
-        Listening,
-        Connected
+        Receive = SD_RECEIVE,
+        Send = SD_SEND,
+        Both = SD_BOTH
     };
 
+    // Stream 소켓
     class Socket final : public IIocpRegistrable
     {
     public:
@@ -47,10 +41,14 @@ namespace csmnet::detail
         {
             Close();
         }
-
-        bool IsOpen() const noexcept { return _state != SocketState::Closed; }
-        expected<void, error_code> Open(SocketType type) noexcept;
+        
+        bool IsValid() const noexcept { return _socket != INVALID_SOCKET; }
+        expected<void, error_code> Open() noexcept;
         void Close() noexcept;
+        void Shutdown(ShutdownKind kind) noexcept
+        {
+            ::shutdown(_socket, static_cast<int>(kind));
+        }
 
         expected<void, error_code> Bind(const Endpoint& local) noexcept;
         expected<void, error_code> Listen(int32 backlog = SOMAXCONN) noexcept;
@@ -66,11 +64,12 @@ namespace csmnet::detail
             ::setsockopt(_socket, option.GetLevel(), option.GetName(), reinterpret_cast<const char*>(option.GetData()), option.GetSize());
         }
 
+        expected<Endpoint, error_code> GetRemoteEndpoint() const noexcept;
+
         operator SOCKET() const noexcept { return _socket; }
         
         HANDLE GetHandle() const noexcept override { return reinterpret_cast<HANDLE>(_socket); }
     private:
         SOCKET _socket = INVALID_SOCKET;
-        SocketState _state = SocketState::Closed;
     };
 }
