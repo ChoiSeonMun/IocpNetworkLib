@@ -59,7 +59,6 @@ namespace csmnet
         SocketNotListening,
         SocketNotConnected,
         CannotCreateSession,
-        MemoryAllocationFailed,
         SessionClosed,
     };
 

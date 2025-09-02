@@ -81,8 +81,6 @@ namespace csmnet::detail
                 return "Cannot create session. Check the factory of the session.";
             case LibError::InvalidSocket:
                 return "Invalid socket";
-            case LibError::MemoryAllocationFailed:
-                return "Memory allocation failed";
             case LibError::SessionClosed:
                 return "Session is closed";
             default:
