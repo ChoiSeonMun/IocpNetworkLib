@@ -6,18 +6,9 @@
 using namespace std;
 namespace csmnet::detail
 {
-    expected<void, error_code> RecvBuffer::Resize(const size_t newSize) noexcept
+    void RecvBuffer::Resize(const size_t newSize)
     {
-        try
-        {
-            _buffer.resize(newSize);
-        }
-        catch (const std::bad_alloc&)
-        {
-            return unexpected(LibError::MemoryAllocationFailed);
-        }
-
-        return {};
+        _buffer.resize(newSize);
     }
 
     std::span<std::byte> RecvBuffer::GetWritableSpan(const size_t wantedSize) noexcept

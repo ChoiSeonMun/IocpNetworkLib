@@ -13,7 +13,8 @@ namespace csmnet::detail
         RecvBuffer() noexcept = default;
         ~RecvBuffer() noexcept = default;
 
-        expected<void, error_code> Resize(size_t newSize) noexcept;
+        // std::bad_alloc이 발생할 수 있다.
+        void Resize(size_t newSize);
 
         void Reset() noexcept
         {
