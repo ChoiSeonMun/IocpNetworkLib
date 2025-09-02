@@ -3,37 +3,41 @@
 #include "Config.h"
 
 #include <vector>
+#include <span>
 
 namespace csmnet::detail
 {
     class RecvBuffer final
     {
     public:
-        explicit RecvBuffer(const size_t capacity);
+        RecvBuffer() noexcept = default;
         ~RecvBuffer() noexcept = default;
+
+        expected<void, error_code> Resize(size_t newSize) noexcept;
 
         void Reset() noexcept
         {
             _readPos = 0;
             _writePos = 0;
         }
-        
-        char* GetWriteBuffer(const size_t wantedSize);
 
+        std::span<std::byte> GetWritableSpan() noexcept
+        {
+            const size_t freeSize = GetWritableSize();
+            return GetWritableSpan(freeSize);
+        }
+
+        std::span<std::byte> GetWritableSpan(size_t wantedSize) noexcept;
+        
         void CommitRead(const size_t size) noexcept
         {
             _readPos = (_readPos + size);
         }
 
-        size_t GetFreeLinearSize() const noexcept
-        {
-            return GetCapacity() - _writePos;
-        }
-
-        size_t GetCapacity() const noexcept { return _buffer.capacity(); }
+        size_t GetWritableSize() const noexcept { return _buffer.capacity() - _writePos; }
     private:
-        std::vector<char> _buffer;
-        size_t _readPos;
-        size_t _writePos;
+        std::vector<std::byte> _buffer;
+        size_t _readPos = 0;
+        size_t _writePos = 0;
     };
 }

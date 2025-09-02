@@ -1,18 +1,29 @@
 #include "pch.h"
 #include "csmnet/detail/RecvBuffer.h"
 
+#include <span>
+
+using namespace std;
 namespace csmnet::detail
 {
-    RecvBuffer::RecvBuffer(const size_t capacity)
-        : _buffer(capacity)
-        , _readPos(0)
-        , _writePos(0)
+    expected<void, error_code> RecvBuffer::Resize(const size_t newSize) noexcept
     {
+        try
+        {
+            _buffer.resize(newSize);
+        }
+        catch (const std::bad_alloc&)
+        {
+            return unexpected(LibError::MemoryAllocationFailed);
+        }
+
+        return {};
     }
 
-    char* RecvBuffer::GetWriteBuffer(const size_t wantedSize)
+    std::span<std::byte> RecvBuffer::GetWritableSpan(const size_t wantedSize) noexcept
     {
-        if (GetFreeLinearSize() < wantedSize)
+        const size_t freeSize = GetWritableSize();
+        if (freeSize < wantedSize)
         {
             const size_t usedSize = _writePos - _readPos;
             if (usedSize == 0)
@@ -27,7 +38,6 @@ namespace csmnet::detail
             }
         }
 
-        return &_buffer[_writePos];
+        return span(&_buffer[_writePos], wantedSize);
     }
-
 }
