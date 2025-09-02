@@ -20,46 +20,39 @@ namespace csmnet::util
         using ObjectFactory = std::function<T()>;
         using ResetAction = std::function<void(T*)>;
     public:
-        static expected<ObjectPool, error_code> Create(size_t poolSize, ObjectFactory objectFactory, ResetAction resetAction) noexcept
+        // std::bad_alloc 예외가 발생할 수 있다.
+        ObjectPool(size_t poolSize, ObjectFactory objectFactory, ResetAction resetAction)
+            : _resetAction(std::move(resetAction))
         {
-            try
+            CSM_ASSERT(poolSize > 0);
+            CSM_ASSERT(objectFactory != nullptr);
+
+            _container.reserve(poolSize);
+
+            std::function<T()> lambdaCtor{ };
+            if (objectFactory)
             {
-                Container container;
-                container.reserve(poolSize);
-
-                std::function<T()> lambdaCtor{ };
-                if (objectFactory)
-                {
-                    lambdaCtor = std::move(objectFactory);
-                }
-                else
-                {
-                    lambdaCtor = []() { return T(); };
-                }
-
-                for (size_t i = 0; i < poolSize; ++i)
-                {
-                    container.push_back(lambdaCtor());
-                }
-
-                Pool pool;
-                for (auto& obj : container)
-                {
-                    pool.push(&obj);
-                }
-
-                return ObjectPool(std::move(resetAction), std::move(container), std::move(pool));
+                lambdaCtor = std::move(objectFactory);
             }
-            catch (const std::bad_alloc&)
+            else
             {
-                return std::unexpected(LibError::MemoryAllocationFailed);
+                lambdaCtor = []() { return T(); };
+            }
+
+            for (size_t i = 0; i < poolSize; ++i)
+            {
+                _container.push_back(lambdaCtor());
+            }
+
+            for (auto& obj : _container)
+            {
+                _pool.push(&obj);
             }
         }
-
         ObjectPool(const ObjectPool&) = delete;
         ObjectPool& operator=(const ObjectPool&) = delete;
-        ObjectPool(ObjectPool&&) noexcept = default;
-        ObjectPool& operator=(ObjectPool&&) noexcept = default;
+        ObjectPool(ObjectPool&&) noexcept = delete;
+        ObjectPool& operator=(ObjectPool&&) noexcept = delete;
         ~ObjectPool() noexcept = default;
 
         // 풀이 비었다면 nullptr일 수 있다.
@@ -83,20 +76,12 @@ namespace csmnet::util
             return PooledObject(obj, deleter);
         }
     private:
-        ObjectPool(ResetAction&& resetAction, Container&& container, Pool&& pool) noexcept
-            :
-            _resetAction(std::move(resetAction)),
-            _container(std::move(container)),
-            _pool(std::move(pool))
-        {
-        }
-
         void Push(T* object) noexcept
         {
             _pool.push(object);
         }
     private:
-        ResetAction _resetAction;
+        ResetAction _resetAction{ nullptr };
         Container _container;
         Pool _pool;
     };
