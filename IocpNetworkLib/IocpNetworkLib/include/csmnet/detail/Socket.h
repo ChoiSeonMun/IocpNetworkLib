@@ -42,7 +42,7 @@ namespace csmnet::detail
             Close();
         }
         
-        bool IsValid() const noexcept { return _socket != INVALID_SOCKET; }
+        bool IsOpen() const noexcept { return _socket != INVALID_SOCKET; }
         expected<void, error_code> Open() noexcept;
         void Close() noexcept;
         void Shutdown(ShutdownKind kind) noexcept
