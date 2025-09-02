@@ -45,11 +45,8 @@ namespace csmnet::detail
         bool IsOpen() const noexcept { return _socket != INVALID_SOCKET; }
         expected<void, error_code> Open() noexcept;
         void Close() noexcept;
-        void Shutdown(ShutdownKind kind) noexcept
-        {
-            ::shutdown(_socket, static_cast<int>(kind));
-        }
 
+        expected<void, error_code> Shutdown(ShutdownKind kind) noexcept;
         expected<void, error_code> Bind(const Endpoint& local) noexcept;
         expected<void, error_code> Listen(int32 backlog = SOMAXCONN) noexcept;
         expected<void, error_code> AcceptEx(AcceptEvent& event) noexcept;

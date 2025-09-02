@@ -9,7 +9,7 @@ namespace csmnet::detail
 {
     expected<void, error_code> Socket::Open() noexcept
     {
-        if (IsValid())
+        if (IsOpen())
         {
             return unexpected(LibError::SocketAlreadyOpen);
         }
@@ -25,7 +25,7 @@ namespace csmnet::detail
 
     void Socket::Close() noexcept
     {
-        if (IsValid())
+        if (IsOpen())
         {
             ::closesocket(_socket);
             _socket = INVALID_SOCKET;
@@ -46,6 +46,17 @@ namespace csmnet::detail
         }
 
         return *this;
+    }
+
+    expected<void, error_code> Socket::Shutdown(ShutdownKind kind) noexcept
+    {
+        int32 result = ::shutdown(_socket, static_cast<int>(kind));
+        if (result == SOCKET_ERROR)
+        {
+            return unexpected(TranslateWsaError(WSAGetLastError()));
+        }
+
+        return {};
     }
 
     expected<void, error_code> Socket::Bind(const Endpoint& local) noexcept
@@ -147,7 +158,7 @@ namespace csmnet::detail
 
     expected<void, error_code> Socket::RecvEx(RecvEvent& event) noexcept
     {
-        if (IsValid() == false)
+        if (IsOpen() == false)
         {
             return unexpected(LibError::InvalidSocket);
         }
