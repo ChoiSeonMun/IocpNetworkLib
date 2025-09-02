@@ -158,6 +158,11 @@ namespace csmnet::detail
     {
     public:
         IOCP_EVENT_DEFAULT_IMPL()
+
+        void Reset() noexcept
+        {
+            IocpEvent::Reset();
+        }
     };
 }
 
