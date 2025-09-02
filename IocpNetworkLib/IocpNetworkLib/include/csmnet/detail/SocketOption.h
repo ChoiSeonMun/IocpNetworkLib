@@ -31,7 +31,7 @@ namespace csmnet::detail
     public:
         Linger() noexcept = default;
         Linger(bool isOn, int timeout) noexcept
-            : _linger{ isOn ? 1 : 0, timeout }
+            : _linger( isOn ? 1 : 0, timeout )
         {
         }
 
