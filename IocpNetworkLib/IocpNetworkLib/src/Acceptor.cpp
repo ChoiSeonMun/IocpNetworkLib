@@ -44,6 +44,7 @@ namespace csmnet::detail
     void Acceptor::Process(AcceptEvent* event)
     {
         Socket acceptedSocket = std::move(event->GetAcceptSocket());
+        acceptedSocket.SetOption(Socket::Linger{ true, 0 });
         acceptedSocket.SetOption(Socket::UpdateAcceptContext{ _listenSocket });
         auto remote = acceptedSocket.GetRemoteEndpoint();
 
