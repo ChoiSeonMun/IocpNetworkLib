@@ -15,12 +15,14 @@ namespace csmnet::detail
     {
     public:
         Acceptor(util::ILogger& logger, IocpCore& iocpCore, IServerApiForAcceptor& server);
-
         Acceptor(const Acceptor&) = delete;
         Acceptor& operator=(const Acceptor&) = delete;
-        Acceptor(Acceptor&&) noexcept = default;
-        Acceptor& operator=(Acceptor&&) noexcept = default;
-        ~Acceptor() noexcept = default;
+        Acceptor(Acceptor&&) = delete;
+        Acceptor& operator=(const Acceptor&) = delete;
+        ~Acceptor() noexcept
+        {
+            Close();
+        }
 
         expected<void, error_code> Open(const Endpoint& local);
         void Close() noexcept;
@@ -35,6 +37,6 @@ namespace csmnet::detail
         IocpCore& _iocpCore;
         
         Socket _listenSocket;
-        AcceptEvent _acceptEvent{ this };
+        AcceptEvent _acceptEvent{ *this };
     };
 }

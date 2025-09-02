@@ -8,9 +8,18 @@
 
 namespace csmnet::detail
 {
+    Acceptor::Acceptor(util::ILogger& logger, IocpCore& iocpCore, IServerApiForAcceptor& server)
+        :
+        _logger(logger),
+        _iocpCore(iocpCore),
+        _server(server)
+    {
+        CSM_ASSERT(_iocpCore.IsOpen());
+    }
+
     expected<void, error_code> Acceptor::Open(const Endpoint& local)
     {
-        return _listenSocket.Open(SocketType::Tcp)
+        return _listenSocket.Open()
             .and_then([this, &local]() -> expected<void, error_code>
                 {
                     _listenSocket.SetOption(Socket::ReuseAddress{ true });
@@ -27,14 +36,6 @@ namespace csmnet::detail
                 });
     }
 
-    Acceptor::Acceptor(util::ILogger& logger, IocpCore& iocpCore, IServerApiForAcceptor& server)
-        :
-        _logger(logger),
-        _iocpCore(iocpCore),
-        _server(server)
-    {
-    }
-
     void Acceptor::Close() noexcept
     {
         _listenSocket.Close();
@@ -44,18 +45,21 @@ namespace csmnet::detail
     {
         Socket acceptedSocket = std::move(event->GetAcceptSocket());
         acceptedSocket.SetOption(Socket::UpdateAcceptContext{ _listenSocket });
-        Endpoint remote = event->GetRemote();
+        auto remote = acceptedSocket.GetRemoteEndpoint();
 
         auto session = _server.GetSession();
         if (session)
         {
-            session->SetConnection(std::move(event->GetAcceptSocket()), std::move(remote));
+            _iocpCore.Register(acceptedSocket);
+            session->SetConnection(std::move(acceptedSocket), std::move(*remote));
+            session->SetLogger(&_logger);
             _server.AddSession(session);
+
             session->OnConnected();
         }
         else
         {
-            _logger.Info(format("Acceptor::Process - No available session. Closing {}:{}", remote.GetIp(), remote.GetPort()));
+            _logger.Info(format("Acceptor::Process - No available session. Closing {}:{}", remote->GetIp(), remote->GetPort()));
         }
         
         if (auto result = PostAccept(); !result)
@@ -69,11 +73,10 @@ namespace csmnet::detail
     expected<void, error_code> Acceptor::PostAccept() noexcept
     {
         Socket acceptSocket;
-        return acceptSocket.Open(SocketType::Tcp)
+        return acceptSocket.Open()
             .and_then([this, &acceptSocket]()
                 {
-                    _acceptEvent.Reset();
-                    _acceptEvent.PrepareSocket(std::move(acceptSocket));
+                    _acceptEvent.Reset(std::move(acceptSocket));
                     return _listenSocket.AcceptEx(_acceptEvent);
                 });
     }
