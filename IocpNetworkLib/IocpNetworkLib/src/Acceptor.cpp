@@ -22,6 +22,7 @@ namespace csmnet::detail
         return _listenSocket.Open()
             .and_then([this, &local]() -> expected<void, error_code>
                 {
+                    _listenSocket.SetOption(Socket::Linger{ true, 0 });
                     _listenSocket.SetOption(Socket::ReuseAddress{ true });
                     return _listenSocket.Bind(local);
                 })
@@ -44,7 +45,6 @@ namespace csmnet::detail
     void Acceptor::Process(AcceptEvent* event)
     {
         Socket acceptedSocket = std::move(event->GetAcceptSocket());
-        acceptedSocket.SetOption(Socket::Linger{ true, 0 });
         acceptedSocket.SetOption(Socket::UpdateAcceptContext{ _listenSocket });
         auto remote = acceptedSocket.GetRemoteEndpoint();
 
@@ -53,7 +53,6 @@ namespace csmnet::detail
         {
             _iocpCore.Register(acceptedSocket);
             session->SetConnection(std::move(acceptedSocket), std::move(*remote));
-            session->SetLogger(&_logger);
             _server.AddSession(session);
 
             session->OnConnected();
