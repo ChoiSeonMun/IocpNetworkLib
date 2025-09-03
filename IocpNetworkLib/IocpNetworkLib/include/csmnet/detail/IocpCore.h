@@ -42,7 +42,7 @@ namespace csmnet::detail
         void Register(const IIocpRegistrable& registrable) const noexcept;
 
         // 성공 값은 nullptr일 수 있다.
-        expected<IocpEvent*, error_code> GetQueuedCompletionEvent() const noexcept;
+        expected<IocpEvent*, error_code> GetQueuedCompletionEvent(uint32 waitTimeMs = INFINITE) const noexcept;
         // 성공 값들 중에는 nullptr일 수 있다.
         expected<std::vector<IocpEvent*>, error_code> GetQueuedCompletionEvents() const noexcept;
 

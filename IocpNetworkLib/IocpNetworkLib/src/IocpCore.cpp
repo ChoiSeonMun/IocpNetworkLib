@@ -14,13 +14,13 @@ namespace csmnet::detail
         ::CreateIoCompletionPort(registrable.GetHandle(), _iocpHandle, 0, 0);
     }
 
-    expected<IocpEvent*, error_code> IocpCore::GetQueuedCompletionEvent() const noexcept
+    expected<IocpEvent*, error_code> IocpCore::GetQueuedCompletionEvent(const uint32 waitTimeMs) const noexcept
     {
         OVERLAPPED* overlapped = nullptr;
         ULONG_PTR key = 0;
         DWORD bytesTransferred = 0;
 
-        if (::GetQueuedCompletionStatus(_iocpHandle, &bytesTransferred, &key, &overlapped, INFINITE))
+        if (::GetQueuedCompletionStatus(_iocpHandle, &bytesTransferred, &key, &overlapped, waitTimeMs))
         {
             return IocpEvent::From(overlapped, bytesTransferred);
         }
