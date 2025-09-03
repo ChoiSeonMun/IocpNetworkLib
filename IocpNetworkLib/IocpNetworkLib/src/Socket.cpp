@@ -9,10 +9,7 @@ namespace csmnet::detail
 {
     expected<void, error_code> Socket::Open() noexcept
     {
-        if (IsOpen())
-        {
-            return unexpected(LibError::SocketAlreadyOpen);
-        }
+        CSM_ASSERT(IsOpen() == false);
 
         _socket = ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);        
         if (_socket == INVALID_SOCKET)
@@ -50,6 +47,8 @@ namespace csmnet::detail
 
     expected<void, error_code> Socket::Shutdown(ShutdownKind kind) noexcept
     {
+        CSM_ASSERT(IsOpen());
+
         int32 result = ::shutdown(_socket, static_cast<int>(kind));
         if (result == SOCKET_ERROR)
         {
@@ -61,6 +60,8 @@ namespace csmnet::detail
 
     expected<void, error_code> Socket::Bind(const Endpoint& local) noexcept
     {
+        CSM_ASSERT(IsOpen());
+
         int32 result = ::bind(_socket, local.GetNative(), local.GetSize());
         if (result == SOCKET_ERROR)
         {
@@ -72,6 +73,8 @@ namespace csmnet::detail
 
     expected<void, error_code> Socket::Listen(int32 backlog) noexcept
     {
+        CSM_ASSERT(IsOpen());
+
         int32 result = ::listen(_socket, backlog);
         if (result == SOCKET_ERROR)
         {
@@ -84,6 +87,8 @@ namespace csmnet::detail
 
     expected<void, error_code> Socket::AcceptEx(AcceptEvent& event) noexcept
     {
+        CSM_ASSERT(IsOpen());
+
         BOOL result = ::AcceptEx(_socket,
             event.GetAcceptSocket(),
             event.GetBuffer(),
@@ -103,6 +108,8 @@ namespace csmnet::detail
 
     expected<void, error_code> Socket::ConnectEx(ConnectEvent& event) noexcept
     {
+        CSM_ASSERT(IsOpen());
+
         BOOL result = WinsockExtension::ConnectEx(
             _socket,
             event.GetRemote().GetNative(),
@@ -123,6 +130,8 @@ namespace csmnet::detail
 
     expected<void, error_code> Socket::DisconnectEx(DisconnectEvent& event) noexcept
     {
+        CSM_ASSERT(IsOpen());
+
         BOOL result = WinsockExtension::DisconnectEx(
             _socket,
             nullptr,
@@ -140,6 +149,8 @@ namespace csmnet::detail
 
     expected<void, error_code> Socket::SendEx(SendEvent& event) noexcept
     {
+        CSM_ASSERT(IsOpen());
+
         auto result = WSASend(_socket,
             event.GetData(),
             event.GetBufferCount(),
@@ -158,10 +169,7 @@ namespace csmnet::detail
 
     expected<void, error_code> Socket::RecvEx(RecvEvent& event) noexcept
     {
-        if (IsOpen() == false)
-        {
-            return unexpected(LibError::InvalidSocket);
-        }
+        CSM_ASSERT(IsOpen());
 
         auto result = WSARecv(_socket,
             event.GetData(),
