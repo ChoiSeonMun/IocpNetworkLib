@@ -10,12 +10,36 @@ namespace csmnet::detail
     public:
         Boolean() noexcept = default;
         explicit Boolean(bool value) noexcept : _value(value ? 1 : 0) {}
+        Boolean(Boolean& other) noexcept = default;
         Boolean& operator=(bool value)
         {
             _value = value ? 1 : 0;
             return *this;
         }
 
+        int GetLevel() const noexcept { return Level; }
+        int GetName() const noexcept { return Name; }
+        void* GetData() noexcept { return &_value; }
+        const void* GetData() const noexcept { return &_value; }
+        size_t GetSize() const noexcept { return sizeof(_value); }
+    private:
+        int _value = 0;
+    };
+
+    template <int Level, int Name>
+    class Integer final
+    {
+    public:
+        Integer() noexcept = default;
+        explicit Integer(int value) noexcept : _value(value) {}
+        Integer(Integer& other) noexcept = default;
+        Integer& operator=(int value) noexcept
+        {
+            _value = value;
+            return *this;
+        }
+
+        int GetValue() const noexcept { return _value; }
         int GetLevel() const noexcept { return Level; }
         int GetName() const noexcept { return Name; }
         void* GetData() noexcept { return &_value; }
@@ -61,5 +85,16 @@ namespace csmnet::detail
         size_t GetSize() const noexcept { return sizeof(_listenSocket); }
     private:
         SOCKET _listenSocket = INVALID_SOCKET;
+    };
+
+    template <int Level, int Name>
+    class UpdateConnectContext final
+    {
+    public:
+        int GetLevel() const noexcept { return Level; }
+        int GetName() const noexcept { return Name; }
+        void* GetData() noexcept { return nullptr; }
+        const void* GetData() const noexcept { return nullptr; }
+        size_t GetSize() const noexcept { return 0; }
     };
 }

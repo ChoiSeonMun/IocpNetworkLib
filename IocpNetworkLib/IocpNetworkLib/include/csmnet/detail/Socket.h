@@ -31,6 +31,7 @@ namespace csmnet::detail
         using Linger = Linger<SOL_SOCKET, SO_LINGER>;
         using ReuseAddress = Boolean<SOL_SOCKET, SO_REUSEADDR>;
         using UpdateAcceptContext = UpdateAcceptContext<SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT>;
+        using UpdateConnectContext = UpdateConnectContext<SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT>;
 
         Socket() noexcept = default;
         Socket(const Socket&) = delete;
