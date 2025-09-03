@@ -16,6 +16,7 @@ namespace csmnet::detail
     class AcceptEvent;
     class ConnectEvent;
     class DisconnectEvent;
+    class IocpEvent;
 
     enum class ShutdownKind
     {
@@ -55,6 +56,7 @@ namespace csmnet::detail
         expected<void, error_code> DisconnectEx(DisconnectEvent& event) noexcept;
         expected<void, error_code> SendEx(SendEvent& event) noexcept;
         expected<void, error_code> RecvEx(RecvEvent& event) noexcept;
+        expected<void, error_code> CancelEvent(IocpEvent* event = nullptr) noexcept;
 
         template <typename SocketOption>
         void SetOption(const SocketOption& option) noexcept

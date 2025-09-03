@@ -179,8 +179,27 @@ namespace csmnet::detail
         return {};
     }
 
+    expected<void, error_code> Socket::CancelEvent(IocpEvent* event) noexcept
+    {
+        CSM_ASSERT(IsOpen());
+
+        auto result = ::CancelIoEx(GetHandle(), event ? event->GetOverlappedData() : nullptr);
+        
+        if (result == FALSE)
+        {
+            if (int32 error = GetLastError(); error != ERROR_NOT_FOUND)
+            {
+                return unexpected(error_code(error, std::system_category()));
+            }
+        }
+
+        return {};
+    }
+
     expected<Endpoint, error_code> Socket::GetRemoteEndpoint() const noexcept
     {
+        CSM_ASSERT(IsOpen());
+
         sockaddr_in addr{ };
         socklen_t addrLen = sizeof(sockaddr_in);
         int result = ::getpeername(_socket,
