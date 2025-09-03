@@ -13,8 +13,6 @@
     <ClCompile Include="src\Socket.cpp" />
     <ClCompile Include="src\Endpoint.cpp" />
     <ClCompile Include="src\Acceptor.cpp" />
-    <ClCompile Include="src\IocpEvent.cpp" />
-    <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\WinsockExtension.cpp" />
     <ClCompile Include="src\Client.cpp" />
     <ClCompile Include="src\WinsockInitializer.cpp" />
@@ -25,6 +23,8 @@
       <Filter>Detail</Filter>
     </ClCompile>
     <ClCompile Include="src\SpdLogger.cpp" />
+    <ClCompile Include="src\ClientSession.cpp" />
+    <ClCompile Include="src\ServerSession.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\csmnet\common\Error.h">
@@ -57,6 +57,13 @@
     </ClInclude>
     <ClInclude Include="include\csmnet\util\ILogger.h" />
     <ClInclude Include="include\csmnet\util\SpdLogger.h" />
+    <ClInclude Include="include\csmnet\ClientSession.h" />
+    <ClInclude Include="include\csmnet\common\Type.h" />
+    <ClInclude Include="include\csmnet\detail\Session.h" />
+    <ClInclude Include="include\csmnet\ServerSession.h" />
+    <ClInclude Include="include\csmnet\util\ObjectPool.h" />
+    <ClInclude Include="include\csmnet\detail\IServerApiForAcceptor.h" />
+    <ClInclude Include="include\csmnet\common\Assertion.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Common">

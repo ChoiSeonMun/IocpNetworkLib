@@ -82,9 +82,6 @@
     <IncludePath>$(ProjectDir)include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
-  <PropertyGroup Label="Vcpkg">
-    <VcpkgEnableManifest>false</VcpkgEnableManifest>
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -162,12 +159,15 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="include\csmnet\common\Assertion.h" />
+    <ClInclude Include="include\csmnet\common\Type.h" />
     <ClInclude Include="include\csmnet\detail\Acceptor.h" />
     <ClInclude Include="include\csmnet\common\Error.h" />
     <ClInclude Include="include\csmnet\detail\Config.h" />
     <ClInclude Include="include\csmnet\detail\IIocpRegistrable.h" />
     <ClInclude Include="include\csmnet\detail\IocpCore.h" />
     <ClInclude Include="include\csmnet\detail\IocpEvent.h" />
+    <ClInclude Include="include\csmnet\detail\IServerApiForAcceptor.h" />
     <ClInclude Include="include\csmnet\detail\SendBuffer.h" />
     <ClInclude Include="include\csmnet\detail\Socket.h" />
     <ClInclude Include="include\csmnet\detail\SocketOption.h" />
@@ -176,11 +176,17 @@
     <ClInclude Include="include\csmnet\detail\RecvBuffer.h" />
     <ClInclude Include="include\csmnet\Endpoint.h" />
     <ClInclude Include="include\csmnet\Server.h" />
+    <ClInclude Include="include\csmnet\ClientSession.h" />
+    <ClInclude Include="include\csmnet\ServerSession.h" />
+    <ClInclude Include="include\csmnet\detail\Session.h" />
     <ClInclude Include="include\csmnet\util\ILogger.h" />
+    <ClInclude Include="include\csmnet\util\ObjectPool.h" />
     <ClInclude Include="include\csmnet\util\SpdLogger.h" />
     <ClInclude Include="src\pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ClientSession.cpp" />
+    <ClCompile Include="src\ServerSession.cpp" />
     <ClCompile Include="src\SpdLogger.cpp" />
     <ClCompile Include="src\RecvBuffer.cpp" />
     <ClCompile Include="src\SendBuffer.cpp" />
@@ -189,10 +195,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\IocpEvent.cpp" />
     <ClCompile Include="src\Acceptor.cpp" />
     <ClCompile Include="src\Endpoint.cpp" />
-    <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\Socket.cpp" />
     <ClCompile Include="src\Error.cpp" />
     <ClCompile Include="src\IocpCore.cpp" />
