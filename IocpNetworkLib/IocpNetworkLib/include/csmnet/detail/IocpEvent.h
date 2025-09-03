@@ -9,9 +9,10 @@
 #include <span>
 
 #define DEFINE_PROCESS(iocp_event) virtual void Process(class iocp_event* event) { }
-#define IOCP_EVENT_DEFAULT_IMPL() \
+#define IOCP_EVENT_DEFAULT_IMPL(iocpEvent) \
     using IocpEvent::IocpEvent; \
-    void Process() override  { _processor.Process(this); }
+    void Process() override  { _processor.Process(this); } \
+    std::string_view ToString() override { return #iocpEvent; }
 
 
 namespace csmnet::detail
@@ -52,6 +53,7 @@ namespace csmnet::detail
         virtual ~IocpEvent() noexcept = default;
 
         virtual void Process() = 0;
+        virtual std::string_view ToString() = 0;
 
         uint32 GetBytesTransferred() const noexcept { return _bytesTransferred; }
 
@@ -75,11 +77,11 @@ namespace csmnet::detail
     class AcceptEvent final : public IocpEvent
     {
     public:
-        IOCP_EVENT_DEFAULT_IMPL()
+        IOCP_EVENT_DEFAULT_IMPL(AcceptEvent)
 
         void Reset(Socket&& socket) noexcept
         {
-            CSM_ASSERT(socket.IsValid());
+            CSM_ASSERT(socket.IsOpen());
 
             IocpEvent::Reset();
             _acceptSocket = std::move(socket);
@@ -96,7 +98,7 @@ namespace csmnet::detail
     class ConnectEvent final : public IocpEvent
     {
     public:
-        IOCP_EVENT_DEFAULT_IMPL()
+        IOCP_EVENT_DEFAULT_IMPL(ConnectEvent)
            
         void Reset(const Endpoint& remote) noexcept
         {
@@ -116,7 +118,7 @@ namespace csmnet::detail
     class RecvEvent final : public IocpEvent
     {
     public:
-        IOCP_EVENT_DEFAULT_IMPL()
+        IOCP_EVENT_DEFAULT_IMPL(RecvEvent)
 
         void Reset(span<byte> buffer) noexcept
         {
@@ -140,7 +142,7 @@ namespace csmnet::detail
     class SendEvent final : public IocpEvent
     {
     public:
-        IOCP_EVENT_DEFAULT_IMPL()
+        IOCP_EVENT_DEFAULT_IMPL(SendEvent)
 
         void Reset(span<byte> buffer) noexcept
         {
@@ -161,7 +163,7 @@ namespace csmnet::detail
     class DisconnectEvent final : public IocpEvent
     {
     public:
-        IOCP_EVENT_DEFAULT_IMPL()
+        IOCP_EVENT_DEFAULT_IMPL(DisconnectEvent)
 
         void Reset() noexcept
         {
