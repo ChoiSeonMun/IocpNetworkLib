@@ -11,7 +11,7 @@ namespace csmnet
     {
     public:
         static Endpoint Any(uint16 port) noexcept;
-        static optional<Endpoint> From(std::string_view ip, uint16 port) noexcept;
+        static expected<Endpoint, error_code> From(std::string_view ip, uint16 port) noexcept;
 
         explicit Endpoint(sockaddr_in sockaddr) noexcept : _addr(sockaddr) {}
 

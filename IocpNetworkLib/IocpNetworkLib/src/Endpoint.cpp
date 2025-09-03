@@ -17,14 +17,14 @@ namespace csmnet
         return Endpoint(addr);
     }
 
-    optional<Endpoint> Endpoint::From(std::string_view ip, uint16 port) noexcept
+    expected<Endpoint, error_code> Endpoint::From(std::string_view ip, uint16 port) noexcept
     {
         sockaddr_in addr{ };
         addr.sin_family = AF_INET;
         addr.sin_port = htons(port);
         if (inet_pton(AF_INET, ip.data(), &addr.sin_addr) == 0)
         {
-            return nullopt;
+            return unexpected(TranslateWsaError(WSAGetLastError()));
         }
 
         return Endpoint(addr);
