@@ -28,20 +28,9 @@ namespace csmnet::util
             CSM_ASSERT(objectFactory != nullptr);
 
             _container.reserve(poolSize);
-
-            std::function<T()> lambdaCtor{ };
-            if (objectFactory)
-            {
-                lambdaCtor = std::move(objectFactory);
-            }
-            else
-            {
-                lambdaCtor = []() { return T(); };
-            }
-
             for (size_t i = 0; i < poolSize; ++i)
             {
-                _container.push_back(lambdaCtor());
+                _container.push_back(objectFactory());
             }
 
             for (auto& obj : _container)
