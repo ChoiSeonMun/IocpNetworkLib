@@ -3,6 +3,7 @@
 
 #include <csmnet/Client.h>
 #include <csmnet/util/SpdLogger.h>
+#include <csmnet/ClientSession.h>
 
 #include <iostream>
 #include <print>
@@ -13,34 +14,60 @@
 using namespace std;
 using namespace csmnet;
 
+class ClientSession2 : public ClientSession
+{
+public:
+    using ClientSession::ClientSession;
+
+    void OnConnected() override
+    {
+        ClientSession::OnConnected();
+
+        _logger.Info(format("ClientSession2::OnConnected - Connected to {}:{}", _remote.GetIp(), _remote.GetPort()));
+    }
+
+    void OnDisconnected() override
+    {
+        ClientSession::OnDisconnected();
+        
+        _logger.Info(format("ClientSession2::OnDisconnected - Disconnected from {}:{}", _remote.GetIp(), _remote.GetPort()));
+    }
+};
+
 int main()
 {
     SetConsoleOutputCP(CP_UTF8);
 
-    auto server = Endpoint::From("127.0.0.1", 12345);
-    if (!server)
-    {
-        std::println("[Error] Invalid server endpoint.");
-        return 1;
-    }
+    auto logger = csmnet::util::SpdConsoleLogger();
 
-    Client client;
-    if (auto result = client.Connect(server.value()); !result)
+    auto clientSessionFactory = [&logger]()
+    {
+        auto session = make_unique<ClientSession2>(logger);
+        session->SetRecvBufferSize(0x10000); // 64KB
+        return session;
+    };
+
+    ClientConfig config;
+    config.IoThreadCount = 4;
+    config.SessionCount = 100;
+    config.ServerPort = 12345;
+    config.ServerIp = "127.0.0.1";
+    
+    Client client(clientSessionFactory, std::move(config));
+    if (auto result = client.Run(); !result)
     {
         std::println("[Error: {}] Failed to connect to server: {}", static_cast<int>(result.error().value()), result.error().message());
         return 1;
     }
 
-    std::println("Connected to server at {}:{}", server->GetIp(), server->GetPort());
     while (true)
     {
         std::println("Press any key to exit...");
-        char input;
+        std::string input;
         std::cin >> input;
-        if (input == 'q' || input == 'Q')
+        if (input == "q" || input == "Q")
         {
-            client.Disconnect();
-            break;
+            client.Stop();
         }
     }
 }

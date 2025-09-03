@@ -2,20 +2,58 @@
 //
 
 #include <csmnet/Server.h>
+#include <csmnet/ServerSession.h>
+#include <csmnet/util/SpdLogger.h>
 
 #include <iostream>
 #include <print>
 
 #pragma comment(lib, "IocpNetworkLib.lib")
 
+class MyServerSession : public csmnet::ServerSession
+{
+public:
+    using csmnet::ServerSession::ServerSession;
+
+    void OnConnected() override
+    {
+        ServerSession::OnConnected();
+
+        auto remote = GetRemoteEndpoint();
+        std::println("클라이언트 접속: {}:{}", remote.GetIp(), remote.GetPort());
+    }
+
+    void OnDisconnected() override
+    {
+        ServerSession::OnDisconnected();
+
+        auto remote = GetRemoteEndpoint();
+        std::println("클라이언트 접속 해제: {}:{}", remote.GetIp(), remote.GetPort());
+    }
+};
 
 int main()
 {
     SetConsoleOutputCP(CP_UTF8);
 
-    csmnet::Server server;
+    csmnet::ServerConfig config;
+    config.MaxSessionCount = 1;
+    config.Port = 12345;
+    config.IoThreadCount = 4;
+    config.SessionCleanIntervalSec = 5;
 
-    if (auto result = server.Open(1000, 12345); !result)
+    csmnet::util::SpdConsoleLogger logger; 
+    csmnet::Server<MyServerSession>::SessionFactory sessionFactory = [&logger]() -> MyServerSession
+        {
+            constexpr size_t kDefaultRecvBufferSize = 0x10000; // 64KB
+            MyServerSession session(logger);
+            session.SetRecvBufferSize(kDefaultRecvBufferSize);
+
+            return session;
+        };
+
+    csmnet::Server<MyServerSession> server(logger, std::move(config), std::move(sessionFactory), {});
+    if (auto result = server.Open(); !result)
     {
         println("[Error: {}] Failed to open server : {}", static_cast<int>(result.error().value()), result.error().message());
         return 1;
