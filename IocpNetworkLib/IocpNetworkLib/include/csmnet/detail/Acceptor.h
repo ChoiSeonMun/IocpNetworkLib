@@ -18,7 +18,7 @@ namespace csmnet::detail
         Acceptor(const Acceptor&) = delete;
         Acceptor& operator=(const Acceptor&) = delete;
         Acceptor(Acceptor&&) = delete;
-        Acceptor& operator=(const Acceptor&) = delete;
+        Acceptor& operator=(Acceptor&&) = delete;
         ~Acceptor() noexcept
         {
             Close();
