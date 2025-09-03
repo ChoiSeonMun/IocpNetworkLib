@@ -60,6 +60,7 @@ namespace csmnet::detail
         else
         {
             _logger.Info(format("Acceptor::Process - No available session. Closing {}:{}", remote->GetIp(), remote->GetPort()));
+            acceptedSocket.Close();
         }
         
         if (auto result = PostAccept(); !result)
