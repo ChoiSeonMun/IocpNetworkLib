@@ -131,6 +131,7 @@ namespace csmnet::detail
             _wsaBuf.buf = reinterpret_cast<char*>(buffer.data());
         }
 
+        bool IsRemoteClosed() const noexcept { return GetBytesTransferred() == 0; }
         uint32* GetFlagsData() noexcept { return &_flags; }
         WSABUF* GetData() noexcept { return &_wsaBuf; }
         size_t GetBufferCount() const noexcept { return 1; }
