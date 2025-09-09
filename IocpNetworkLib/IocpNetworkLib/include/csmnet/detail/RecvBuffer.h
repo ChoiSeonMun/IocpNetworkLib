@@ -29,6 +29,11 @@ namespace csmnet::detail
         }
 
         std::span<std::byte> GetWritableSpan(size_t wantedSize) noexcept;
+
+        std::span<const std::byte> GetReadableSpan(size_t readSize) const noexcept
+        {
+            return { _buffer.data() + _readPos, readSize };
+        }
         
         void CommitRead(const size_t size) noexcept
         {
