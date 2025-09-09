@@ -13,22 +13,29 @@
 class MyServerSession : public csmnet::ServerSession
 {
 public:
-    using csmnet::ServerSession::ServerSession;
+    using ServerSession::ServerSession;
 
     void OnConnected() override
     {
-        ServerSession::OnConnected();
-
         auto remote = GetRemoteEndpoint();
         std::println("클라이언트 접속: {}:{}", remote.GetIp(), remote.GetPort());
     }
 
     void OnDisconnected() override
     {
-        ServerSession::OnDisconnected();
-
         auto remote = GetRemoteEndpoint();
         std::println("클라이언트 접속 해제: {}:{}", remote.GetIp(), remote.GetPort());
+    }
+
+    void OnRecv(std::span<const std::byte> message) override
+    {
+        auto remote = GetRemoteEndpoint();
+        _logger.Info(format("MyServerSession::OnRecv - Received : {} From {}:{}",
+            reinterpret_cast<const char*>(message.data()),
+            remote.GetIp(),
+            remote.GetPort()));
+        Send(message);
+        _logger.Info("MyServerSession::OnRecv - Echoed");
     }
 };
 

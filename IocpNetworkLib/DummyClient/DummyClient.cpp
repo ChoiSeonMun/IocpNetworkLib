@@ -21,16 +21,33 @@ public:
 
     void OnConnected() override
     {
-        ClientSession::OnConnected();
-
         _logger.Info(format("ClientSession2::OnConnected - Connected to {}:{}", _remote.GetIp(), _remote.GetPort()));
+
+        std::span<const char> message = "This is test message.";
+        if (auto result = Send(std::as_bytes(message)); !result)
+        {
+            _logger.Error(format("ClientSession2::OnConnected - fail to send message : [{}] {}",
+                result.error().value(),
+                result.error().message()));
+            Disconnect();
+            return;
+        }
+
+        _logger.Info(format("ClientSession2::OnConnected - Sent : {}", message.data()));   
     }
 
     void OnDisconnected() override
     {
-        ClientSession::OnDisconnected();
-        
         _logger.Info(format("ClientSession2::OnDisconnected - Disconnected from {}:{}", _remote.GetIp(), _remote.GetPort()));
+    }
+
+    void OnRecv(span<const byte> message) override
+    {
+        _logger.Info(format("ClientSession2::OnRecv - Received : {}",
+            reinterpret_cast<const char*>(message.data())));
+        this_thread::sleep_for(1ms);
+        Send(message);
+        _logger.Info("ClientSession2::OnRecv - Echoed");
     }
 };
 
@@ -49,7 +66,7 @@ int main()
 
     ClientConfig config;
     config.IoThreadCount = 4;
-    config.SessionCount = 100;
+    config.SessionCount = 1;
     config.ServerPort = 12345;
     config.ServerIp = "127.0.0.1";
     
@@ -62,13 +79,17 @@ int main()
 
     while (true)
     {
-        std::println("Press any key to exit...");
+        std::println("메시지를 입력하세요(Quit은 종료): ");
         std::string input;
         std::cin >> input;
-        if (input == "q" || input == "Q")
+
+        if (input == "Quit")
         {
             client.Stop();
+            break;
         }
+
+        
     }
 }
 
