@@ -7,6 +7,7 @@
 
 namespace csmnet::detail
 {
+    
     class RecvBuffer final
     {
     public:
@@ -14,7 +15,12 @@ namespace csmnet::detail
         ~RecvBuffer() noexcept = default;
 
         // std::bad_alloc이 발생할 수 있다.
-        void Resize(size_t newSize);
+        void Resize(size_t newSize)
+        {
+            CSM_ASSERT(newSize > 0);
+
+            _buffer.resize(newSize);
+        }
 
         void Reset() noexcept
         {
@@ -24,23 +30,32 @@ namespace csmnet::detail
 
         std::span<std::byte> GetWritableSpan() noexcept
         {
-            const size_t freeSize = GetWritableSize();
-            return GetWritableSpan(freeSize);
+            const size_t writableSize = _buffer.capacity() - _writePos;
+            CSM_ASSERT(writableSize > 0);
+
+            return { &_buffer[_writePos], writableSize };
         }
 
-        std::span<std::byte> GetWritableSpan(size_t wantedSize) noexcept;
-
-        std::span<const std::byte> GetReadableSpan(size_t readSize) const noexcept
+        std::span<const std::byte> GetReadableSpan(size_t readSize) noexcept
         {
-            return { _buffer.data() + _readPos, readSize };
-        }
-        
-        void CommitRead(const size_t size) noexcept
-        {
-            _readPos = (_readPos + size);
+            CSM_ASSERT(readSize > 0);
+
+            _writePos += readSize;
+            const size_t readableSize = _writePos - _readPos;
+
+            return { &_buffer[_readPos], readableSize};
         }
 
-        size_t GetWritableSize() const noexcept { return _buffer.capacity() - _writePos; }
+        void CommitRead(size_t size) noexcept
+        {
+            CSM_ASSERT(size > 0);
+
+            _readPos += size;
+            if (_readPos == _writePos)
+            {
+                Reset();
+            }
+        }
     private:
         std::vector<std::byte> _buffer;
         size_t _readPos = 0;
