@@ -145,20 +145,26 @@ namespace csmnet::detail
     public:
         IOCP_EVENT_DEFAULT_IMPL(SendEvent)
 
-        void Reset(span<byte> buffer) noexcept
+        void Reset(span<const byte> buffer) noexcept
         {
             CSM_ASSERT(buffer.data() != nullptr);
             CSM_ASSERT(buffer.empty() == false);
 
             IocpEvent::Reset();
+
+            // TODO: 복사 없이 사용하도록 개선 필요
+            std::ranges::copy(buffer, _internalBuffer.begin());
+
             _wsaBuf.len = static_cast<ULONG>(buffer.size());
-            _wsaBuf.buf = reinterpret_cast<char*>(buffer.data());
+            _wsaBuf.buf = reinterpret_cast<char*>(_internalBuffer.data());
         }
 
         WSABUF* GetData() noexcept { return &_wsaBuf; }
         size_t GetBufferCount() const noexcept { return 1; }
     private:
         WSABUF _wsaBuf;
+        // NOTE: 임시 크기
+        array<byte, 4096> _internalBuffer;
     };
 
     class DisconnectEvent final : public IocpEvent
