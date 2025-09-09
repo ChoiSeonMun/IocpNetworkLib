@@ -55,7 +55,7 @@ namespace csmnet::detail
             session->SetConnection(std::move(acceptedSocket), std::move(*remote));
             _server.AddSession(session);
 
-            if (auto result = session->Start(); !result)
+            if (auto result = session->Activate(); !result)
             {
                 _logger.Error(format("Acceptor::Process(AcceptEvent) - Fail to start session: [{}] {}", result.error().value(), result.error().message()));
                 session->Disconnect();

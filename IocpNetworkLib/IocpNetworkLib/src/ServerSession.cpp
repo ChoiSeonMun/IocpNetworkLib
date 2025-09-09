@@ -14,71 +14,26 @@ namespace csmnet
         _isConnected = true;
     }
 
-    expected<void, error_code> ServerSession::Start() noexcept
-    {
-        return PostRecv()
-            .and_then([this]() -> expected<void, error_code>
-                {
-                    _logger.Info(format("ServerSession::Start - [Session {}:{}] Started.", _remote.GetIp(), _remote.GetPort()));
-                    OnConnected();
-
-                    return {};
-                });
-    }
-
-    expected<void, error_code> ServerSession::Send(std::span<const std::byte> data) noexcept
-    {
-        if (_isConnected == false)
-        {
-            return unexpected(LibError::SessionClosed);
-        }
-
-        // TODO: Send 구현
-    }
-
     void ServerSession::Disconnect() noexcept
     {
-        if (_isConnected)
+        if (_isConnected.exchange(false) == false)
         {
-            _logger.Info(format("ServerSession::Disconnect - [Session {}:{}] Disconnecting...", _remote.GetIp(), _remote.GetPort()));
-
-            _socket.Shutdown(ShutdownKind::Both);
-            _socket.Close();
-
-            OnDisconnected();
-
-            _isConnected = false;
-        }
-    }
-
-    void ServerSession::Process(detail::RecvEvent* event)
-    {
-        if (event->GetBytesTransferred() == 0)
-        {
-            _logger.Info(format("ServerSession::Process(RecvEvent) - [Session {}:{}] Remote disconnected.", _remote.GetIp(), _remote.GetPort()));
-            
-            Disconnect();
             return;
         }
-        else
-        {
-            if (auto result = PostRecv(); !result)
-            {
-                _logger.Error(format("ServerSession::Process(RecvEvent) - [Session {}:{}] Fail to post recv: [{}] {}",
-                    _remote.GetIp(),
-                    _remote.GetPort(),
-                    result.error().value(),
-                    result.error().message()));
-            }
-        }
-        
+
+        _logger.Info(format("ServerSession::Disconnect - [Session {}:{}] Disconnecting...", _remote.GetIp(), _remote.GetPort()));
+
+        _socket.Shutdown(ShutdownKind::Both);
+        _socket.Close();
+
+        OnDisconnected();
     }
 
-    expected<void, error_code> ServerSession::PostRecv() noexcept
+    void ServerSession::OnRemoteClosed()
     {
-        const auto buffer = _recvBuffer.GetWritableSpan();
+        _logger.Info(format("[Session {}:{}] Remote disconnected.", _remote.GetIp(), _remote.GetPort()));
 
-        _recvEvent.Reset(buffer);
-        return _socket.RecvEx(_recvEvent);
+        Disconnect();
     }
+    
 }
