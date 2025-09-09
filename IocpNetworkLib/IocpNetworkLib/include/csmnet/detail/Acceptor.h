@@ -26,10 +26,9 @@ namespace csmnet::detail
 
         expected<void, error_code> Open(const Endpoint& local);
         void Close() noexcept;
-
-        void Process(AcceptEvent* event) override;
-
     private:
+        void Process(AcceptEvent* event) final;
+
         expected<void, error_code> PostAccept() noexcept;
     private:
         util::ILogger& _logger;
