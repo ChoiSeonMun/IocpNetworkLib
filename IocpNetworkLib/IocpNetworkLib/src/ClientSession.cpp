@@ -8,12 +8,6 @@ using namespace csmnet::detail;
 
 namespace csmnet
 {
-    expected<void, error_code> ClientSession::Send(std::span<const std::byte> data) noexcept
-    {
-        // TODO: Send 등록
-        return expected<void, error_code>();
-    }
-
     expected<void, error_code> ClientSession::Connect(const Endpoint& serverEndpoint, IocpCore& iocpCore) noexcept
     {
         CSM_ASSERT(iocpCore.IsOpen());
@@ -47,40 +41,24 @@ namespace csmnet
         }
     }
 
+    void ClientSession::OnRemoteClosed()
+    {
+        _socket.Shutdown(ShutdownKind::Receive);
+        _socket.Close();
+    }
+
     void ClientSession::Process(detail::ConnectEvent* event)
     {
         _socket.SetOption(Socket::UpdateConnectContext{});
         _remote = event->GetRemote();
-        _isConnected = true;
-
-        if (auto result = PostRecv(); !result)
+        
+        if (auto result = Activate(); !result)
         {
-            _logger.Error(format("ClientSession::Process(ConnectEvent) - fail to post recv : [{}] {}",
+            _logger.Error(format("ClientSession::Process(ConnectEvent) - fail to activate : [{}] {}",
                 result.error().value(),
                 result.error().message()));
 
             Disconnect();
-            return;
-        }
-
-        _logger.Info("ClientSession::Process(ConnectEvent) - Connected");
-        OnConnected();
-    }
-
-    expected<void, error_code> ClientSession::PostRecv() noexcept
-    {
-        const auto buffer = _recvBuffer.GetWritableSpan();
-
-        _recvEvent.Reset(buffer);
-        return _socket.RecvEx(_recvEvent);
-    }
-
-    void ClientSession::Process(detail::RecvEvent* event)
-    {
-        if (event->GetBytesTransferred() == 0)
-        {
-            _socket.Shutdown(ShutdownKind::Receive);
-            _socket.Close();
         }
     }
 }
