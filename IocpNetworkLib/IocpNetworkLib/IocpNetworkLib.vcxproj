@@ -187,8 +187,8 @@
   <ItemGroup>
     <ClCompile Include="src\ClientSession.cpp" />
     <ClCompile Include="src\ServerSession.cpp" />
+    <ClCompile Include="src\Session.cpp" />
     <ClCompile Include="src\SpdLogger.cpp" />
-    <ClCompile Include="src\RecvBuffer.cpp" />
     <ClCompile Include="src\SendBuffer.cpp" />
     <ClCompile Include="src\WinsockExtension.cpp" />
     <ClCompile Include="src\Client.cpp">

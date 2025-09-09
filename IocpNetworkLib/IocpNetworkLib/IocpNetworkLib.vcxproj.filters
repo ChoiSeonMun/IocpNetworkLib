@@ -16,15 +16,13 @@
     <ClCompile Include="src\WinsockExtension.cpp" />
     <ClCompile Include="src\Client.cpp" />
     <ClCompile Include="src\WinsockInitializer.cpp" />
-    <ClCompile Include="src\RecvBuffer.cpp">
-      <Filter>Detail</Filter>
-    </ClCompile>
     <ClCompile Include="src\SendBuffer.cpp">
       <Filter>Detail</Filter>
     </ClCompile>
     <ClCompile Include="src\SpdLogger.cpp" />
     <ClCompile Include="src\ClientSession.cpp" />
     <ClCompile Include="src\ServerSession.cpp" />
+    <ClCompile Include="src\Session.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\csmnet\common\Error.h">
