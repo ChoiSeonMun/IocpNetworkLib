@@ -8,11 +8,11 @@
 namespace csmnet::detail
 {
     
-    class RecvBuffer final
+    class FifoBuffer final
     {
     public:
-        RecvBuffer() noexcept = default;
-        ~RecvBuffer() noexcept = default;
+        FifoBuffer() noexcept = default;
+        ~FifoBuffer() noexcept = default;
 
         // std::bad_alloc이 발생할 수 있다.
         void Resize(size_t newSize)
