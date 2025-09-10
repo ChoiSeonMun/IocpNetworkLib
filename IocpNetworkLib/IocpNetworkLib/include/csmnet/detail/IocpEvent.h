@@ -2,7 +2,6 @@
 
 #include "Config.h"
 #include "Socket.h"
-#include "RecvBuffer.h"
 #include "csmnet/util/ObjectPool.h"
 
 #include <array>

@@ -4,7 +4,7 @@
 #include "csmnet/detail/Socket.h"
 #include "csmnet/Endpoint.h"
 #include "csmnet/detail/IocpEvent.h"
-#include "csmnet/detail/FifoBuffer.h"
+#include "csmnet/util/FifoBuffer.h"
 
 namespace csmnet::util { class ILogger; }
 
@@ -51,6 +51,6 @@ namespace csmnet
     private:    
         detail::SendEvent _sendEvent{ *this };
         detail::RecvEvent _recvEvent{ *this };
-        detail::FifoBuffer _recvBuffer;
+        util::FifoBuffer _recvBuffer;
     };
 }

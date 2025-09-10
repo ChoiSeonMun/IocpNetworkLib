@@ -1,13 +1,12 @@
 #pragma once
 
-#include "Config.h"
+#include "csmnet/detail/Config.h"
 
 #include <vector>
 #include <span>
 
-namespace csmnet::detail
+namespace csmnet::util
 {
-    
     class FifoBuffer final
     {
     public:
