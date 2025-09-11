@@ -34,7 +34,27 @@ public:
             reinterpret_cast<const char*>(message.data()),
             remote.GetIp(),
             remote.GetPort()));
-        Send(message);
+
+        auto sendBuffer = GetSendBuffer();
+        if (sendBuffer.EnsureWritable(message.size()) == false)
+        {
+            _logger.Error("MyServerSession::OnRecv - 송신 버퍼의 크기가 부족합니다.");
+            Disconnect();
+            return;
+        }
+        auto writableSpan = sendBuffer.Poke(message.size());
+        std::ranges::copy(message, writableSpan.data());
+        sendBuffer.Advance(message.size());
+
+        if (auto result = Send(sendBuffer); !result)
+        {
+            _logger.Error(format("MyServerSession::OnRecv - fail to send message : [{}] {}",
+                result.error().value(),
+                result.error().message()));
+            Disconnect();
+            return;
+        }
+
         _logger.Info("MyServerSession::OnRecv - Echoed");
     }
 };
@@ -53,8 +73,11 @@ int main()
     csmnet::Server<MyServerSession>::SessionFactory sessionFactory = [&logger]() -> MyServerSession
         {
             constexpr size_t kDefaultRecvBufferSize = 0x10000; // 64KB
+            constexpr size_t kDefaultSendBufferSize = 0x10000; // 64KB
+
             MyServerSession session(logger);
             session.SetRecvBufferSize(kDefaultRecvBufferSize);
+            session.SetSendBufferSize(kDefaultSendBufferSize);
 
             return session;
         };

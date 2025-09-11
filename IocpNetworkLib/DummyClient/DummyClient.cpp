@@ -23,8 +23,19 @@ public:
     {
         _logger.Info(format("ClientSession2::OnConnected - Connected to {}:{}", _remote.GetIp(), _remote.GetPort()));
 
+        auto sendBuffer = GetSendBuffer();
         std::span<const char> message = "This is test message.";
-        if (auto result = Send(std::as_bytes(message)); !result)
+        if (sendBuffer.EnsureWritable(message.size()) == false)
+        {
+            _logger.Error("ClientSession2::OnConnected - 송신 버퍼의 크기가 부족합니다.");
+            Disconnect();
+            return;
+        }
+        auto writableSpan = sendBuffer.Poke(message.size());
+        std::ranges::copy(message, reinterpret_cast<char*>(writableSpan.data()));
+        sendBuffer.Advance(message.size());
+
+        if (auto result = Send(sendBuffer); !result)
         {
             _logger.Error(format("ClientSession2::OnConnected - fail to send message : [{}] {}",
                 result.error().value(),
@@ -45,8 +56,28 @@ public:
     {
         _logger.Info(format("ClientSession2::OnRecv - Received : {}",
             reinterpret_cast<const char*>(message.data())));
-        this_thread::sleep_for(1ms);
-        Send(message);
+        this_thread::sleep_for(500ms);
+
+        auto sendBuffer = GetSendBuffer();
+        if (sendBuffer.EnsureWritable(message.size()) == false)
+        {
+            _logger.Error("ClientSession2::OnConnected - 송신 버퍼의 크기가 부족합니다.");
+            Disconnect();
+            return;
+        }
+        auto writableSpan = sendBuffer.Poke(message.size());
+        std::ranges::copy(message, writableSpan.data());
+        sendBuffer.Advance(message.size());
+
+        if (auto result = Send(sendBuffer); !result)
+        {
+            _logger.Error(format("ClientSession2::OnRecv - fail to send message : [{}] {}",
+                result.error().value(),
+                result.error().message()));
+            Disconnect();
+            return;
+        }
+        
         _logger.Info("ClientSession2::OnRecv - Echoed");
     }
 };
@@ -61,6 +92,7 @@ int main()
     {
         auto session = make_unique<ClientSession2>(logger);
         session->SetRecvBufferSize(0x10000); // 64KB
+        session->SetSendBufferSize(0x10000); // 64KB
         return session;
     };
 
