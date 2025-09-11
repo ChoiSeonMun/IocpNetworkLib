@@ -130,6 +130,12 @@ namespace csmnet::detail
             _wsaBuf.buf = reinterpret_cast<char*>(buffer.data());
         }
 
+        // 수신된 바이트 수를 반환한다.
+        size_t GetRecvByte() const noexcept
+        {
+            return GetBytesTransferred();
+        }
+
         bool IsRemoteClosed() const noexcept { return GetBytesTransferred() == 0; }
         uint32* GetFlagsData() noexcept { return &_flags; }
         WSABUF* GetData() noexcept { return &_wsaBuf; }
