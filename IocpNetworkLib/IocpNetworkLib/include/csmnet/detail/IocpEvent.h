@@ -3,6 +3,7 @@
 #include "Config.h"
 #include "Socket.h"
 #include "csmnet/util/ObjectPool.h"
+#include "csmnet/util/FifoBuffer.h"
 
 #include <array>
 #include <span>
@@ -150,26 +151,41 @@ namespace csmnet::detail
     public:
         IOCP_EVENT_DEFAULT_IMPL(SendEvent)
 
-        void Reset(span<const byte> buffer) noexcept
+        void Reset() noexcept
         {
-            CSM_ASSERT(buffer.data() != nullptr);
-            CSM_ASSERT(buffer.empty() == false);
-
             IocpEvent::Reset();
 
-            // TODO: 복사 없이 사용하도록 개선 필요
-            std::ranges::copy(buffer, _internalBuffer.begin());
-
-            _wsaBuf.len = static_cast<ULONG>(buffer.size());
-            _wsaBuf.buf = reinterpret_cast<char*>(_internalBuffer.data());
+            _wsabufs.clear();
+            _sendBuffers.clear();
         }
 
-        WSABUF* GetData() noexcept { return &_wsaBuf; }
-        size_t GetBufferCount() const noexcept { return 1; }
+        // SendBuffer 추가
+        // 내부적으로 std::vector를 사용하고 있어 이와 관련된 예외가 발생할 수 있다.
+        void AddSendBuffer(util::FifoBuffer<byte>* sendBuffer)
+        {
+            CSM_ASSERT(sendBuffer != nullptr);
+
+            _sendBuffers.push_back(sendBuffer);
+            
+            const auto readableSpan = sendBuffer->Peek();
+            WSABUF wsabuf;
+            wsabuf.buf = reinterpret_cast<char*>(const_cast<byte*>((readableSpan.data())));
+            wsabuf.len = static_cast<ULONG>(readableSpan.size());
+            _wsabufs.push_back(wsabuf);
+        }
+
+        // SendBuffer 모두 제거
+        // 이벤트가 완료된 후 반드시 호출해야 한다.
+        void ClearSendBuffers() noexcept
+        {
+            _sendBuffers.clear();
+        }
+
+        WSABUF* GetData() noexcept { return _wsabufs.data(); }
+        size_t GetBufferCount() const noexcept { return _wsabufs.size(); }
     private:
-        WSABUF _wsaBuf;
-        // NOTE: 임시 크기
-        array<byte, 4096> _internalBuffer;
+        std::vector<WSABUF> _wsabufs;
+        std::vector<util::FifoBuffer<byte>*> _sendBuffers;
     };
 
     class DisconnectEvent final : public IocpEvent
