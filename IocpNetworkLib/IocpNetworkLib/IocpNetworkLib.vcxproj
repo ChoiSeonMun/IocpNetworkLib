@@ -168,12 +168,11 @@
     <ClInclude Include="include\csmnet\detail\IocpCore.h" />
     <ClInclude Include="include\csmnet\detail\IocpEvent.h" />
     <ClInclude Include="include\csmnet\detail\IServerApiForAcceptor.h" />
-    <ClInclude Include="include\csmnet\detail\SendBuffer.h" />
     <ClInclude Include="include\csmnet\detail\Socket.h" />
     <ClInclude Include="include\csmnet\detail\SocketOption.h" />
     <ClInclude Include="include\csmnet\detail\WinsockExtension.h" />
     <ClInclude Include="include\csmnet\detail\WinsockInitializer.h" />
-    <ClInclude Include="include\csmnet\detail\RecvBuffer.h" />
+    <ClInclude Include="include\csmnet\util\FifoBuffer.h" />
     <ClInclude Include="include\csmnet\Endpoint.h" />
     <ClInclude Include="include\csmnet\Server.h" />
     <ClInclude Include="include\csmnet\ClientSession.h" />
@@ -189,7 +188,6 @@
     <ClCompile Include="src\ServerSession.cpp" />
     <ClCompile Include="src\Session.cpp" />
     <ClCompile Include="src\SpdLogger.cpp" />
-    <ClCompile Include="src\SendBuffer.cpp" />
     <ClCompile Include="src\WinsockExtension.cpp" />
     <ClCompile Include="src\Client.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>

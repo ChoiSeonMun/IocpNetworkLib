@@ -16,9 +16,6 @@
     <ClCompile Include="src\WinsockExtension.cpp" />
     <ClCompile Include="src\Client.cpp" />
     <ClCompile Include="src\WinsockInitializer.cpp" />
-    <ClCompile Include="src\SendBuffer.cpp">
-      <Filter>Detail</Filter>
-    </ClCompile>
     <ClCompile Include="src\SpdLogger.cpp" />
     <ClCompile Include="src\ClientSession.cpp" />
     <ClCompile Include="src\ServerSession.cpp" />
@@ -37,7 +34,7 @@
     <ClInclude Include="src\pch.h">
       <Filter>Detail</Filter>
     </ClInclude>
-    <ClInclude Include="include\csmnet\detail\RecvBuffer.h">
+    <ClInclude Include="include\csmnet\util\FifoBuffer.h">
       <Filter>Detail</Filter>
     </ClInclude>
     <ClInclude Include="include\csmnet\detail\IIocpRegistrable.h" />
@@ -50,9 +47,6 @@
     <ClInclude Include="include\csmnet\detail\WinsockInitializer.h" />
     <ClInclude Include="include\csmnet\Client.h" />
     <ClInclude Include="include\csmnet\detail\WinsockExtension.h" />
-    <ClInclude Include="include\csmnet\detail\SendBuffer.h">
-      <Filter>Detail</Filter>
-    </ClInclude>
     <ClInclude Include="include\csmnet\util\ILogger.h" />
     <ClInclude Include="include\csmnet\util\SpdLogger.h" />
     <ClInclude Include="include\csmnet\ClientSession.h" />
