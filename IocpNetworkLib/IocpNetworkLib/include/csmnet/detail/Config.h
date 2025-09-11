@@ -15,3 +15,11 @@
 #include "csmnet/common/Type.h"
 #include "csmnet/common/Error.h"
 #include "csmnet/common/Assertion.h"
+
+// Windows 매크로 정의 해제
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
