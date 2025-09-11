@@ -12,6 +12,7 @@ namespace csmnet
 {
     class Session : public detail::IIocpEventProcessor
     {
+        static constexpr size_t kMinRecvSize = 1024;
     public:
         explicit Session(util::ILogger& logger) noexcept;
         Session(const Session&) = delete;
@@ -23,10 +24,28 @@ namespace csmnet
 
         bool IsConnected() const noexcept { return _isConnected; }
         const Endpoint& GetRemoteEndpoint() const noexcept { return _remote; }
+
+        void SetSendBufferSize(size_t size) { _sendBuffer.Resize(size); }
         void SetRecvBufferSize(size_t size) { _recvBuffer.Resize(size); }
 
         expected<void, error_code> Activate() noexcept;
-        virtual expected<void, error_code> Send(std::span<const std::byte> message) noexcept;
+
+        // 송신 버퍼를 가져온다.
+        // 다른 세션에서 송신 버퍼를 사용 중이라면 송신 버퍼를 얻을 때까지 대기한다.
+        // TODO: 병목 지점이기에 개선이 필요하다.
+        util::FifoBuffer<byte>& GetSendBuffer() noexcept
+        {
+            bool expected = false;
+            bool desired = true;
+            while (_isSending.compare_exchange_strong(expected, desired) == false)
+            {
+                expected = false;
+            }
+
+            return _sendBuffer;
+        }
+
+        virtual expected<void, error_code> Send(util::FifoBuffer<byte>& buffer) noexcept;
         virtual void Disconnect() noexcept = 0;
 
         virtual void OnConnected() = 0;
@@ -41,7 +60,7 @@ namespace csmnet
         void Process(detail::SendEvent* event) final;
 
         expected<void, error_code> PostRecv() noexcept;
-        expected<void, error_code> PostSend(std::span<const std::byte> message) noexcept;
+        expected<void, error_code> PostSend(util::FifoBuffer<csmnet::byte>& buffer) noexcept;
     protected:
         std::atomic<bool> _isConnected{ false };
         util::ILogger& _logger;
@@ -50,7 +69,12 @@ namespace csmnet
     
     private:    
         detail::SendEvent _sendEvent{ *this };
+        util::FifoBuffer<csmnet::byte> _sendBuffer;
+        std::atomic<bool> _isSending{ false };
+        //util::ObjectPool<detail::FifoBuffer> _sendBufferPool;
+        //std::mutex _sendMutex;
+
         detail::RecvEvent _recvEvent{ *this };
-        util::FifoBuffer _recvBuffer;
+        util::FifoBuffer<csmnet::byte> _recvBuffer;
     };
 }

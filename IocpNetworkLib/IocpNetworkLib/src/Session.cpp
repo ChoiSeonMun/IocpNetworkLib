@@ -18,6 +18,7 @@ namespace csmnet
         , _remote(std::move(other._remote))
         , _logger(other._logger)
         , _sendEvent(*this)
+        , _sendBuffer(std::move(other._sendBuffer))
         , _recvEvent(*this)
         , _recvBuffer(std::move(other._recvBuffer))
     {
@@ -31,20 +32,21 @@ namespace csmnet
             _isConnected.store(other._isConnected.load(std::memory_order_acquire), std::memory_order_release);
             _socket = std::move(other._socket);
             _remote = std::move(other._remote);
+            _sendBuffer = std::move(other._sendBuffer);
             _recvBuffer = std::move(other._recvBuffer);
             other._isConnected.store(false, std::memory_order_release);
         }
         return *this;
     }
 
-    expected<void, error_code> Session::Send(std::span<const std::byte> message) noexcept
+    expected<void, error_code> Session::Send(util::FifoBuffer<byte>& buffer) noexcept
     {
         if (_isConnected == false)
         {
             return unexpected(LibError::SessionClosed);
         }
 
-        return PostSend(message);
+        return PostSend(buffer);
     }
 
     void Session::Process(RecvEvent* event)
@@ -57,9 +59,10 @@ namespace csmnet
             return;
         }
 
-        const auto message = _recvBuffer.GetReadableSpan(event->GetBytesTransferred());
+        _recvBuffer.Advance(event->GetRecvByte());
+        const auto message = _recvBuffer.Peek(event->GetRecvByte());
         OnRecv(message);
-        _recvBuffer.CommitRead(message.size());
+        _recvBuffer.Consume(message.size());
 
         if (auto result = PostRecv(); !result)
         {
@@ -75,19 +78,26 @@ namespace csmnet
     void Session::Process(SendEvent* event)
     {
         CSM_ASSERT(event != nullptr);
+
+        event->ClearSendBuffers();
+        _isSending = false;
     }
 
     expected<void, error_code> Session::PostRecv() noexcept
     {
-        const auto buffer = _recvBuffer.GetWritableSpan();
-
+        bool ensureResult = _recvBuffer.EnsureWritable(kMinRecvSize);
+        CSM_ASSERT(ensureResult == true);
+        const auto buffer = _recvBuffer.Poke();
+        
         _recvEvent.Reset(buffer);
         return _socket.RecvEx(_recvEvent);
     }
 
-    expected<void, error_code> Session::PostSend(std::span<const std::byte> message) noexcept
+    expected<void, error_code> Session::PostSend(util::FifoBuffer<byte>& sendBuffer) noexcept
     {
-        _sendEvent.Reset(message);
+        _sendEvent.Reset();
+        _sendEvent.AddSendBuffer(&sendBuffer);
+
         return _socket.SendEx(_sendEvent);
     }
 
