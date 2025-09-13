@@ -41,7 +41,7 @@
     <ClInclude Include="include\csmnet\detail\IocpEvent.h" />
     <ClInclude Include="include\csmnet\detail\SocketOption.h" />
     <ClInclude Include="include\csmnet\detail\Socket.h" />
-    <ClInclude Include="include\csmnet\Endpoint.h" />
+    <ClInclude Include="include\csmnet\detail\Endpoint.h" />
     <ClInclude Include="include\csmnet\detail\Acceptor.h" />
     <ClInclude Include="include\csmnet\Server.h" />
     <ClInclude Include="include\csmnet\detail\WinsockInitializer.h" />

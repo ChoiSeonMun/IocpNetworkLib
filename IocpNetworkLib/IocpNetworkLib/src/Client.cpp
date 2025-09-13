@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "csmnet/Client.h"
-#include "csmnet/Endpoint.h"
 
 #include "csmnet/ClientSession.h"
+#include "csmnet/detail/Endpoint.h"
 
 #include <print>
 

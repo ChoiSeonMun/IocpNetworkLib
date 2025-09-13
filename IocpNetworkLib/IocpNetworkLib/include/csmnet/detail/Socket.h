@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Config.h"
-#include "SocketOption.h"
-#include "IIocpRegistrable.h"
-#include "csmnet/Endpoint.h"
+#include "csmnet/detail/Config.h"
+#include "csmnet/detail/SocketOption.h"
+#include "csmnet/detail/IIocpRegistrable.h"
+#include "csmnet/detail/Endpoint.h"
 
 #include <span>
 

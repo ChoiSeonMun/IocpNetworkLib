@@ -1,11 +1,11 @@
 #include "pch.h"
-#include "csmnet/Endpoint.h"
+#include "csmnet/detail/Endpoint.h"
 
 #include <array>
 
 using namespace std;
 
-namespace csmnet
+namespace csmnet::detail
 {
     Endpoint Endpoint::Any(uint16 port) noexcept
     {

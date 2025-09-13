@@ -2,7 +2,7 @@
 
 #include "csmnet/detail/Config.h"
 #include "csmnet/detail/Socket.h"
-#include "csmnet/Endpoint.h"
+#include "csmnet/detail/Endpoint.h"
 #include "csmnet/detail/IocpEvent.h"
 #include "csmnet/util/FifoBuffer.h"
 

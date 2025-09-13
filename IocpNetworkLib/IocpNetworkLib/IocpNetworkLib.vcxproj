@@ -173,10 +173,10 @@
     <ClInclude Include="include\csmnet\detail\WinsockExtension.h" />
     <ClInclude Include="include\csmnet\detail\WinsockInitializer.h" />
     <ClInclude Include="include\csmnet\util\FifoBuffer.h" />
-    <ClInclude Include="include\csmnet\Endpoint.h" />
     <ClInclude Include="include\csmnet\Server.h" />
     <ClInclude Include="include\csmnet\ClientSession.h" />
     <ClInclude Include="include\csmnet\ServerSession.h" />
+    <ClInclude Include="include\csmnet\detail\Endpoint.h" />
     <ClInclude Include="include\csmnet\detail\Session.h" />
     <ClInclude Include="include\csmnet\util\ILogger.h" />
     <ClInclude Include="include\csmnet\util\ObjectPool.h" />

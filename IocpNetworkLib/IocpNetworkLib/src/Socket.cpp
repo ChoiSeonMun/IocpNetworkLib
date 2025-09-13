@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "csmnet/detail/Socket.h"
-#include "csmnet/Endpoint.h"
+#include "csmnet/detail/Endpoint.h"
 #include "csmnet/detail/IocpEvent.h"
 
 using namespace std;
