@@ -27,8 +27,8 @@ namespace csmnet::network
         Client& operator=(Client&&) noexcept = delete;
 
         bool IsRunning() const noexcept { return _isRunning; }
-        expected<void, error_code> Run() noexcept;
-        void Stop() noexcept;
+        virtual expected<void, error_code> Run() noexcept;
+        virtual void Stop() noexcept;
     private:
         void DispatchIO();
     private:
