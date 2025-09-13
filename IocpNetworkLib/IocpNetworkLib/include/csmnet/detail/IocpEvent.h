@@ -11,7 +11,7 @@
 #define DEFINE_PROCESS(iocp_event) virtual void Process(class iocp_event* event) { }
 #define IOCP_EVENT_DEFAULT_IMPL(iocpEvent) \
     using IocpEvent::IocpEvent; \
-    void Process() override  { _processor.Process(this); } \
+    void Process() override  { GetProcessor().Process(this); } \
     std::string_view ToString() override { return #iocpEvent; }
 
 
@@ -66,10 +66,9 @@ namespace csmnet::detail
             _bytesTransferred = 0;
         }
 
-    protected:
-        IIocpEventProcessor& _processor;
-        
+        IIocpEventProcessor& GetProcessor() noexcept { return _processor; }
     private:
+        IIocpEventProcessor& _processor;
         uint32 _bytesTransferred = 0;
         OVERLAPPED _overlapped = {};
     };
