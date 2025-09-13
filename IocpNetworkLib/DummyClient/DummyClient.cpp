@@ -1,9 +1,10 @@
 // DummyClient.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <csmnet/Client.h>
+#include <csmnet/network/Client.h>
+#include <csmnet/network/ClientSession.h>
+#include <csmnet/dto/ClientConfig.h>
 #include <csmnet/util/SpdLogger.h>
-#include <csmnet/ClientSession.h>
 
 #include <iostream>
 #include <print>
@@ -12,7 +13,8 @@
 #pragma comment(lib, "IocpNetworkLib.lib")
 
 using namespace std;
-using namespace csmnet;
+using namespace csmnet::network;
+using namespace csmnet::dto;
 
 class ClientSession2 : public ClientSession
 {
@@ -98,7 +100,7 @@ int main()
 
     ClientConfig config;
     config.IoThreadCount = 4;
-    config.SessionCount = 1;
+    config.SessionCount = 1000;
     config.ServerPort = 12345;
     config.ServerIp = "127.0.0.1";
     
@@ -120,8 +122,6 @@ int main()
             client.Stop();
             break;
         }
-
-        
     }
 }
 

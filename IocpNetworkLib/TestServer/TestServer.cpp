@@ -1,8 +1,9 @@
 // TestServer.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <csmnet/Server.h>
-#include <csmnet/ServerSession.h>
+#include <csmnet/network/Server.h>
+#include <csmnet/network/ServerSession.h>
+#include <csmnet/dto/ServerConfig.h>
 #include <csmnet/util/SpdLogger.h>
 
 #include <iostream>
@@ -10,7 +11,11 @@
 
 #pragma comment(lib, "IocpNetworkLib.lib")
 
-class MyServerSession : public csmnet::ServerSession
+using namespace std;
+using namespace csmnet::network;
+using namespace csmnet::dto;
+
+class MyServerSession : public ServerSession
 {
 public:
     using ServerSession::ServerSession;
@@ -63,14 +68,14 @@ int main()
 {
     SetConsoleOutputCP(CP_UTF8);
 
-    csmnet::ServerConfig config;
-    config.MaxSessionCount = 1;
+    ServerConfig config;
+    config.MaxSessionCount = 200;
     config.Port = 12345;
     config.IoThreadCount = 4;
     config.SessionCleanIntervalSec = 5;
 
     csmnet::util::SpdConsoleLogger logger; 
-    csmnet::Server<MyServerSession>::SessionFactory sessionFactory = [&logger]() -> MyServerSession
+    Server<MyServerSession>::SessionFactory sessionFactory = [&logger]() -> MyServerSession
         {
             constexpr size_t kDefaultRecvBufferSize = 0x10000; // 64KB
             constexpr size_t kDefaultSendBufferSize = 0x10000; // 64KB
@@ -82,7 +87,7 @@ int main()
             return session;
         };
 
-    csmnet::Server<MyServerSession> server(logger, std::move(config), std::move(sessionFactory), {});
+    Server<MyServerSession> server(logger, std::move(config), std::move(sessionFactory), {});
     if (auto result = server.Open(); !result)
     {
         println("[Error: {}] Failed to open server : {}", static_cast<int>(result.error().value()), result.error().message());
