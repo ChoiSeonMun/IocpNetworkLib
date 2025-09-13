@@ -4,17 +4,20 @@
 #include "csmnet/detail/Socket.h"
 #include "csmnet/detail/Endpoint.h"
 #include "csmnet/detail/IocpEvent.h"
+
 #include "csmnet/util/FifoBuffer.h"
+#include "csmnet/util/ObjectPool.h"
 
 namespace csmnet::util { class ILogger; }
 
-namespace csmnet
+namespace csmnet::detail
 {
     class Session : public detail::IIocpEventProcessor
     {
         static constexpr size_t kMinRecvSize = 1024;
     public:
         explicit Session(util::ILogger& logger) noexcept;
+        //Session(util::ILogger& logger, size_t sendBufferPoolSize) noexcept;
         Session(const Session&) = delete;
         Session& operator=(const Session&) = delete;
         Session(Session&& other) noexcept;

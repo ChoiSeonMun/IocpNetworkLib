@@ -1,12 +1,12 @@
 #include "pch.h"
-#include "csmnet/ClientSession.h"
+#include "csmnet/network/ClientSession.h"
 #include "csmnet/detail/IocpCore.h"
 #include "csmnet/util/ILogger.h"
 
 using namespace std;
 using namespace csmnet::detail;
 
-namespace csmnet
+namespace csmnet::network
 {
     expected<void, error_code> ClientSession::Connect(const Endpoint& serverEndpoint, IocpCore& iocpCore) noexcept
     {

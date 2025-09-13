@@ -1,17 +1,16 @@
 #include "pch.h"
-#include "csmnet/Client.h"
-
-#include "csmnet/ClientSession.h"
+#include "csmnet/network/Client.h"
+#include "csmnet/network/ClientSession.h"
 #include "csmnet/detail/Endpoint.h"
 
 #include <print>
 
 using namespace std;
+using namespace csmnet::detail;
+using namespace csmnet::dto;
 
-namespace csmnet
+namespace csmnet::network
 {
-    using namespace detail;
-
     Client::Client(ClientSessionFactory sessionFactory, ClientConfig config) noexcept
         : _sessionFactory(std::move(sessionFactory)),
         _config(std::move(config))
@@ -33,7 +32,7 @@ namespace csmnet
         return _iocpCore.Open()
             .and_then([this]()
                 {
-                    return Endpoint::From(_config.ServerIp, _config.ServerPort);
+                    return csmnet::detail::Endpoint::From(_config.ServerIp, _config.ServerPort);
                 })
             .and_then([this](Endpoint&& serverEndpoint) -> expected<void, error_code>
                 {

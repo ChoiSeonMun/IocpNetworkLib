@@ -1,11 +1,11 @@
 #include "pch.h"
-#include "csmnet/ServerSession.h"
+#include "csmnet/network/ServerSession.h"
 #include "csmnet/util/ILogger.h"
 
 using namespace std;
 using namespace csmnet::detail;
 
-namespace csmnet
+namespace csmnet::network
 {
     void ServerSession::SetConnection(detail::Socket&& socket, Endpoint&& remote)
     {

@@ -2,30 +2,24 @@
 
 #include "csmnet/detail/Config.h"
 #include "csmnet/detail/IocpCore.h"
+#include "csmnet/dto/ClientConfig.h"
 
 #include <thread>
 #include <functional>
 #include <vector>
 #include <string>
 
-namespace csmnet
-{
-    struct ClientConfig
-    {
-        uint32 IoThreadCount;
-        uint32 SessionCount;
-        uint16 ServerPort;
-        std::string ServerIp;
-    };
+namespace csmnet::detail { class Endpoint; }
 
+namespace csmnet::network
+{
     class ClientSession;
-    class Endpoint;
     
     using ClientSessionFactory = std::function<std::unique_ptr<ClientSession>()>;
     class Client
     {
     public:
-        Client(ClientSessionFactory sessionFactory, ClientConfig config) noexcept;
+        Client(ClientSessionFactory sessionFactory, csmnet::dto::ClientConfig config) noexcept;
         virtual ~Client() noexcept;
         Client(const Client&) = delete;
         Client& operator=(const Client&) = delete;
@@ -39,7 +33,7 @@ namespace csmnet
         void DispatchIO();
     private:
         std::atomic<bool> _isRunning{ false };
-        ClientConfig _config;
+        csmnet::dto::ClientConfig _config;
         detail::IocpCore _iocpCore;
         ClientSessionFactory _sessionFactory;
         std::vector<std::jthread> _ioThreads;

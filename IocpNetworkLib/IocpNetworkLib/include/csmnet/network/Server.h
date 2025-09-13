@@ -4,9 +4,10 @@
 #include "csmnet/detail/IocpCore.h"
 #include "csmnet/detail/IServerApiForAcceptor.h"
 #include "csmnet/detail/Acceptor.h"
-
 #include "csmnet/util/ObjectPool.h"
 #include "csmnet/util/ILogger.h"
+#include "csmnet/dto/ServerConfig.h"
+
 
 #include "ServerSession.h"
 
@@ -20,16 +21,8 @@
 #include <print>
 #include <format>
 
-namespace csmnet
+namespace csmnet::network
 {
-    struct ServerConfig
-    {
-        uint16 Port;
-        uint32 MaxSessionCount;
-        uint32 IoThreadCount;
-        uint32 SessionCleanIntervalSec;
-    };
-
     template <std::derived_from<ServerSession> TSession>
     class Server : public detail::IServerApiForAcceptor
     {
@@ -38,7 +31,7 @@ namespace csmnet
         using SessionFactory = SessionPool::ObjectFactory;
         using SessionResetAction = SessionPool::ResetAction;
 
-        Server(util::ILogger& logger, ServerConfig config, SessionFactory sessionFactory, SessionResetAction sessionResetAction)
+        Server(util::ILogger& logger, csmnet::dto::ServerConfig config, SessionFactory sessionFactory, SessionResetAction sessionResetAction)
             : _logger(logger)
             , _config(std::move(config))
             , _sessionPool(_config.MaxSessionCount, std::move(sessionFactory), std::move(sessionResetAction))
@@ -61,7 +54,7 @@ namespace csmnet
                 .and_then([this]()
                     {
                         _acceptor = std::make_unique<detail::Acceptor>(_logger, _iocpCore, *this);
-                        return _acceptor->Open(Endpoint::Any(_config.Port));
+                        return _acceptor->Open(csmnet::detail::Endpoint::Any(_config.Port));
                     })
                 .and_then([this]() -> expected<void, error_code>
                     {
@@ -142,7 +135,7 @@ namespace csmnet
             }
         }
     private:
-        ServerConfig _config;
+        csmnet::dto::ServerConfig _config;
         util::ILogger& _logger;
         
         std::atomic<bool> _isOpen{ false };

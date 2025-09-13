@@ -12,6 +12,12 @@ namespace csmnet
     {
     }
 
+    //Session::Session(util::ILogger& logger, const size_t poolSize) noexcept
+    //    : _logger(logger),
+    //    //_sendBufferPool(poolSize, []() { return FifoBuffer(); }, nullptr)
+    //{
+    //}
+
     Session::Session(Session&& other) noexcept
         : _isConnected(other._isConnected.load(std::memory_order_acquire))
         , _socket(std::move(other._socket))
@@ -21,6 +27,7 @@ namespace csmnet
         , _sendBuffer(std::move(other._sendBuffer))
         , _recvEvent(*this)
         , _recvBuffer(std::move(other._recvBuffer))
+        //, _sendBufferPool(other._sendBufferPool.GetSize(), []() { return FifoBuffer(); }, nullptr)
     {
         other._isConnected.store(false, std::memory_order_release);
     }

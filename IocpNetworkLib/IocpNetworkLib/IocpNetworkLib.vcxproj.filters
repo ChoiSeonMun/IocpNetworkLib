@@ -43,19 +43,21 @@
     <ClInclude Include="include\csmnet\detail\Socket.h" />
     <ClInclude Include="include\csmnet\detail\Endpoint.h" />
     <ClInclude Include="include\csmnet\detail\Acceptor.h" />
-    <ClInclude Include="include\csmnet\Server.h" />
+    <ClInclude Include="include\csmnet\network\Server.h" />
     <ClInclude Include="include\csmnet\detail\WinsockInitializer.h" />
-    <ClInclude Include="include\csmnet\Client.h" />
+    <ClInclude Include="include\csmnet\network\Client.h" />
     <ClInclude Include="include\csmnet\detail\WinsockExtension.h" />
     <ClInclude Include="include\csmnet\util\ILogger.h" />
     <ClInclude Include="include\csmnet\util\SpdLogger.h" />
-    <ClInclude Include="include\csmnet\ClientSession.h" />
+    <ClInclude Include="include\csmnet\network\ClientSession.h" />
     <ClInclude Include="include\csmnet\common\Type.h" />
     <ClInclude Include="include\csmnet\detail\Session.h" />
-    <ClInclude Include="include\csmnet\ServerSession.h" />
+    <ClInclude Include="include\csmnet\network\ServerSession.h" />
     <ClInclude Include="include\csmnet\util\ObjectPool.h" />
     <ClInclude Include="include\csmnet\detail\IServerApiForAcceptor.h" />
     <ClInclude Include="include\csmnet\common\Assertion.h" />
+    <ClInclude Include="include\csmnet\dto\ServerConfig.h" />
+    <ClInclude Include="include\csmnet\dto\ClientConfig.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Common">

@@ -2,16 +2,16 @@
 
 #include "csmnet/detail/Session.h"
 
-namespace csmnet
+namespace csmnet::network
 {
-    class ServerSession : public Session
+    class ServerSession : public csmnet::detail::Session
     {
     public:
         using Session::Session;
         ServerSession(ServerSession&& other) noexcept = default;
         ServerSession& operator=(ServerSession&& other) noexcept = default;
 
-        void SetConnection(detail::Socket&& socket, Endpoint&& remote);
+        void SetConnection(detail::Socket&& socket, detail::Endpoint&& remote);
         void Disconnect() noexcept override;
 
     protected:
