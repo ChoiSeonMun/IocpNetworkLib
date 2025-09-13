@@ -48,7 +48,7 @@ namespace csmnet::network
             Close();
         }
 
-        expected<void, error_code> Open() noexcept
+        virtual expected<void, error_code> Open() noexcept
         {
             return _iocpCore.Open()
                 .and_then([this]()
@@ -71,7 +71,7 @@ namespace csmnet::network
                     });
         }
 
-        void Close() noexcept
+        virtual void Close() noexcept
         {
             _isOpen = false;
 
