@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<TestServer>
+  <MaxSessionCount>200</MaxSessionCount>
+  <Port>12345</Port>
+  <IoThreadCount>4</IoThreadCount>
+  <SessionCleanIntervalSec>5</SessionCleanIntervalSec>
+</TestServer>

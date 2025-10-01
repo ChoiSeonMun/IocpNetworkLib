@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<DummyClient>
+  <IoThreadCount>4</IoThreadCount>
+  <SessionCount>1000</SessionCount>
+  <ServerPort>12345</ServerPort>
+  <ServerIp>127.0.0.1</ServerIp>
+</DummyClient>

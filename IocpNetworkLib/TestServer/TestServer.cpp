@@ -5,6 +5,7 @@
 #include <csmnet/network/ServerSession.h>
 #include <csmnet/dto/ServerConfig.h>
 #include <csmnet/util/SpdLogger.h>
+#include <csmnet/util/XmlDocument.h>
 
 #include <iostream>
 #include <print>
@@ -64,16 +65,42 @@ public:
     }
 };
 
+ServerConfig CreateConfigFromFile(filesystem::path configFilePath)
+{
+    using namespace csmnet::util;
+
+    XmlDocument doc;
+    auto result = doc.ParseFromFile(configFilePath);
+    CSM_ASSERT(result.has_value());
+
+    XmlNode root = doc.GetNode("TestServer");
+    CSM_ASSERT(root.IsValid());
+
+    XmlNode sessionCountNode = root.GetChild("MaxSessionCount");
+    XmlNode portNode = root.GetChild("Port");
+    XmlNode ioThreadCountNode = root.GetChild("IoThreadCount");
+    XmlNode cleanIntervalNode = root.GetChild("SessionCleanIntervalSec");
+
+    CSM_ASSERT(sessionCountNode.IsValid());
+    CSM_ASSERT(portNode.IsValid());
+    CSM_ASSERT(ioThreadCountNode.IsValid());
+    CSM_ASSERT(cleanIntervalNode.IsValid());
+
+    ServerConfig config;
+    config.MaxSessionCount = *sessionCountNode.GetValue<uint32_t>();
+    config.Port = *portNode.GetValue<uint16_t>();
+    config.IoThreadCount = *ioThreadCountNode.GetValue<uint32_t>();
+    config.SessionCleanIntervalSec = *cleanIntervalNode.GetValue<uint32_t>();
+
+    return config;
+}
+
 int main()
 {
     SetConsoleOutputCP(CP_UTF8);
 
-    ServerConfig config;
-    config.MaxSessionCount = 200;
-    config.Port = 12345;
-    config.IoThreadCount = 4;
-    config.SessionCleanIntervalSec = 5;
-
+    ServerConfig config = CreateConfigFromFile("ServerConfig.xml");
+    
     csmnet::util::SpdConsoleLogger logger; 
     Server<MyServerSession>::SessionFactory sessionFactory = [&logger]() -> MyServerSession
         {

@@ -5,6 +5,7 @@
 #include <csmnet/network/ClientSession.h>
 #include <csmnet/dto/ClientConfig.h>
 #include <csmnet/util/SpdLogger.h>
+#include <csmnet/util/XmlDocument.h>
 
 #include <iostream>
 #include <print>
@@ -84,6 +85,36 @@ public:
     }
 };
 
+ClientConfig CreateConfigFromFile(filesystem::path configFilePath)
+{
+    using namespace csmnet::util;
+
+    XmlDocument doc;
+    auto result = doc.ParseFromFile(configFilePath);
+    CSM_ASSERT(result.has_value());
+
+    XmlNode root = doc.GetNode("DummyClient");
+    CSM_ASSERT(root.IsValid());
+
+    XmlNode sessionCountNode = root.GetChild("SessionCount");
+    XmlNode portNode = root.GetChild("ServerPort");
+    XmlNode ioThreadCountNode = root.GetChild("IoThreadCount");
+    XmlNode serverIp = root.GetChild("ServerIp");
+
+    CSM_ASSERT(sessionCountNode.IsValid());
+    CSM_ASSERT(portNode.IsValid());
+    CSM_ASSERT(ioThreadCountNode.IsValid());
+    CSM_ASSERT(serverIp.IsValid());
+
+    ClientConfig config;
+    config.IoThreadCount = *ioThreadCountNode.GetValue<uint32_t>();
+    config.SessionCount = *sessionCountNode.GetValue<uint32_t>();
+    config.ServerPort = *portNode.GetValue<uint16_t>();
+    config.ServerIp = serverIp.GetValue();
+
+    return config;
+}
+
 int main()
 {
     SetConsoleOutputCP(CP_UTF8);
@@ -98,11 +129,7 @@ int main()
         return session;
     };
 
-    ClientConfig config;
-    config.IoThreadCount = 4;
-    config.SessionCount = 1000;
-    config.ServerPort = 12345;
-    config.ServerIp = "127.0.0.1";
+    ClientConfig config = CreateConfigFromFile("ClientConfig.xml");
     
     Client client(clientSessionFactory, std::move(config));
     if (auto result = client.Run(); !result)
