@@ -20,6 +20,7 @@
     <ClCompile Include="src\ClientSession.cpp" />
     <ClCompile Include="src\ServerSession.cpp" />
     <ClCompile Include="src\Session.cpp" />
+    <ClCompile Include="src\XmlDocument.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\csmnet\common\Error.h">
@@ -58,6 +59,7 @@
     <ClInclude Include="include\csmnet\common\Assertion.h" />
     <ClInclude Include="include\csmnet\dto\ServerConfig.h" />
     <ClInclude Include="include\csmnet\dto\ClientConfig.h" />
+    <ClInclude Include="include\csmnet\util\XmlDocument.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Common">
