@@ -30,7 +30,9 @@
 #include <utility>
 #include <functional>
 #include <concepts>
-
+#include <charconv>
 #include <system_error>
+#include <filesystem>
 
+#include <rapidxml/rapidxml.hpp>
 #endif //PCH_H
