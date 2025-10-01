@@ -1,6 +1,8 @@
-Package: vcpkg-cmake-config
-Version: 2024-05-23
+Package: rapidxml
+Version: 1.13
+Port-Version: 6
 Architecture: x64-windows
 Multi-Arch: same
-Abi: 21a989ae3ef63050f3081a784600cf749f12e6c1473687894d35a182e37264d3
+Abi: f2b1774a97d74456d4018fd2cd8668e4d233fe10d7512f3bd4a292e51e752a0d
+Description: RapidXml is an attempt to create the fastest XML parser possible, while retaining useability, portability and reasonable W3C compatibility.
 Status: install ok half-installed

@@ -1,0 +1,43 @@
+Package: vcpkg-cmake-config
+Version: 2024-05-23
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 21a989ae3ef63050f3081a784600cf749f12e6c1473687894d35a182e37264d3
+Status: install ok installed
+
+Package: vcpkg-cmake
+Version: 2024-04-23
+Architecture: x64-windows
+Multi-Arch: same
+Abi: b13f6669a5e92b197bcf41082e946902a79608fb0068dd672521aa6928462c36
+Status: install ok installed
+
+Package: fmt
+Version: 11.0.2
+Port-Version: 1
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 4f56989b143e93285f09d8fc5a358b62ab7e12b0ea87dd90b0a551c14e92224d
+Description: {fmt} is an open-source formatting library providing a fast and safe alternative to C stdio and C++ iostreams.
+Status: install ok installed
+
+Package: spdlog
+Version: 1.15.0
+Port-Version: 1
+Depends: fmt, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 977ee020c27226e037194000a59c11870e29a50b206911ba6149928f450d84f9
+Description: Very fast, header-only/compiled, C++ logging library.
+Status: install ok installed
+
+Package: rapidxml
+Version: 1.13
+Port-Version: 6
+Architecture: x64-windows
+Multi-Arch: same
+Abi: f2b1774a97d74456d4018fd2cd8668e4d233fe10d7512f3bd4a292e51e752a0d
+Description: RapidXml is an attempt to create the fastest XML parser possible, while retaining useability, portability and reasonable W3C compatibility.
+Status: install ok installed
+

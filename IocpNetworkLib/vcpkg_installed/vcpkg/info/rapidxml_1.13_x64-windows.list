@@ -1,0 +1,12 @@
+x64-windows/
+x64-windows/include/
+x64-windows/include/rapidxml/
+x64-windows/include/rapidxml/rapidxml.hpp
+x64-windows/include/rapidxml/rapidxml_iterators.hpp
+x64-windows/include/rapidxml/rapidxml_print.hpp
+x64-windows/include/rapidxml/rapidxml_utils.hpp
+x64-windows/share/
+x64-windows/share/rapidxml/
+x64-windows/share/rapidxml/copyright
+x64-windows/share/rapidxml/vcpkg.spdx.json
+x64-windows/share/rapidxml/vcpkg_abi_info.txt
