@@ -16,6 +16,11 @@ namespace csmnet::detail
 
     expected<IocpEvent*, error_code> IocpCore::GetQueuedCompletionEvent(const uint32 waitTimeMs) const noexcept
     {
+        if (IsOpen() == false)
+        {
+            return unexpected(LibError::IocpCoreNotOpen);
+        }
+
         OVERLAPPED* overlapped = nullptr;
         ULONG_PTR key = 0;
         DWORD bytesTransferred = 0;
@@ -62,6 +67,29 @@ namespace csmnet::detail
         }
 
         return events;
+    }
+
+    expected<void, error_code> IocpCore::PostQueuedCompletionEvent(IocpEvent* iocpEvent) const noexcept
+    {
+        if (IsOpen() == false)
+        {
+            return unexpected(LibError::IocpCoreNotOpen);
+        }
+
+        auto result = ::PostQueuedCompletionStatus(
+            _iocpHandle,
+            // NOTE: 이벤트는 IocpEventProcessor에 의해 처리되므로 식별자를 넣지 않는다.
+            0,
+            0,
+            iocpEvent ? iocpEvent->GetOverlappedData() : nullptr
+        );
+
+        if (!result)
+        {
+            return unexpected(error_code(::GetLastError(), system_category()));
+        }
+
+        return expected<void, error_code>();
     }
 
     expected<void, error_code> IocpCore::Open() noexcept
