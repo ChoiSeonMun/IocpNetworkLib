@@ -73,11 +73,24 @@ namespace csmnet::network
 
         virtual void Close() noexcept
         {
-            _isOpen = false;
+            if (bool wasOpened = _isOpen.exchange(false); wasOpened == false)
+            {
+                return;
+            }
 
-            // TODO: 종료 신호 보내고 join 처리
-            _iocpCore.Close();
+            _logger.Info("Server::Close - Shutting down...");
 
+            const int32 ioThreadCount = static_cast<int32>(_ioThreads.size());
+            for (int32 i = 0; i < ioThreadCount; ++i)
+            {
+                if (auto result = _iocpCore.Shutdown(); !result)
+                {
+                    _logger.Error(format("Shutdown Failed - {}: {}",
+                        result.error().value(),
+                        result.error().message()));
+                }
+            }
+            
             for (auto& thread : _ioThreads)
             {
                 if (thread.joinable())
@@ -85,6 +98,8 @@ namespace csmnet::network
                     thread.join();
                 }
             }
+
+            _iocpCore.Close();
         }
 
         bool IsOpen() const noexcept { return _isOpen.load(std::memory_order_acquire); }
@@ -98,28 +113,23 @@ namespace csmnet::network
         {
             while (_isOpen)
             {
-                auto result = _iocpCore.GetQueuedCompletionEvent()
-                    .and_then([this](detail::IocpEvent* event) -> expected<void, error_code>
-                        {
-                            if (event)
-                            {
-                                event->Process();
-                            }
-
-                            return {};
-                        });
-
-                if (_isOpen == false)
+                auto result = _iocpCore.GetQueuedCompletionEvent();
+                if (!result)
                 {
-                    _logger.Info("Server::ProcessIO - Server Closed. Stop IO Thread.");
+                    _logger.Error(format("Server::ProcessIO - {}: {}",
+                        result.error().value(),
+                        result.error().message()));
+                    continue;
+                }
+                
+                csmnet::detail::IocpEvent* event = *result;
+                if (event == nullptr)
+                {
+                    _logger.Info("Server::ProcessIO - Received Shutdown Signal. Stop IO Thread.");
                     break;
                 }
 
-                if (!result)
-                {
-                    auto& error = result.error();
-                    _logger.Error(format("Server::ProcessIO - {}: {}", error.value(), error.message()));
-                }
+                event->Process();
             }
         }
 
