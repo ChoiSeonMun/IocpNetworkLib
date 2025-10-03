@@ -11,6 +11,9 @@ namespace csmnet
     template<typename T, typename E>
     using expected = std::expected<T, E>;
 
+    template <typename E>
+    using unexpected = std::unexpected<E>;
+
     using error_code = std::error_code;
 
     template <typename T>
